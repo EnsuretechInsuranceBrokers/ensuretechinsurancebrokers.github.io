@@ -1,14 +1,549 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document Title</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Where brokers, TPAs, insurers, employers, and HR teams converge onto a single, validated, auditable onboarding layer.">
+<title>About — Ensuretech</title>
+
+<!-- Public CDN assets: GSAP is distributed under its standard license; Unsplash imagery is used as decorative fallback photography. -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg:#070807; --panel:#0d100e; --panel2:#111511; --ink:#f2f5ee;
+  --muted:#9da69d; --acid:#d8ff43; --line:rgba(242,245,238,.13);
+  --soft:rgba(216,255,67,.08); --accent2:#7dffce; --max:1280px;
+  --shadow:rgba(0,0,0,.35);
+}
+body.light {
+  --bg:#fffaf8; --panel:#fff; --panel2:#fff3ef; --ink:#190b09;
+  --muted:#725c58; --acid:#d9271c; --line:rgba(25,11,9,.13);
+  --soft:rgba(217,39,28,.08); --accent2:#ff6b5f; --shadow:rgba(98,19,13,.12);
+}
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:Manrope,system-ui,sans-serif; overflow-x:hidden; }
+body:before {
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:20; opacity:.06;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E");
+}
+a { color:inherit; text-decoration:none; }
+.container { width:min(var(--max),calc(100% - 48px)); margin:auto; }
+.mono { font:500 11px/1.3 "DM Mono",monospace; text-transform:uppercase; letter-spacing:.12em; }
+.acid { color:var(--acid); }
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:30; height:76px;
+  border-bottom:1px solid transparent; transition:.35s ease;
+}
+nav.scrolled { background:rgba(7,8,7,.82); backdrop-filter:blur(18px); border-color:var(--line); }
+.nav-inner { height:100%; display:flex; align-items:center; justify-content:space-between; }
+.logo { display:flex; gap:10px; align-items:center; font-weight:800; letter-spacing:-.04em; }
+.logo-mark { width:28px; height:28px; border:1px solid var(--acid); display:grid; place-items:center; transform:rotate(45deg); }
+.logo-mark i { display:block; width:9px; height:9px; background:var(--acid); }
+.nav-links { display:flex; gap:28px; color:var(--muted); font-size:13px; }
+.nav-links a { transition:.25s; }
+.nav-links a:hover { color:var(--acid); transform:translateY(-2px); }
+.nav-cta { border:1px solid var(--line); padding:11px 15px; font-size:12px; transition:.3s; }
+.nav-cta:hover { background:var(--acid); color:#080a08; border-color:var(--acid); transform:translateY(-2px); }
+
+.hero { min-height:100vh; padding:170px 0 90px; position:relative; display:flex; align-items:center; }
+.hero-grid { position:absolute; inset:0; opacity:.16; background-size:80px 80px; background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px); mask-image:linear-gradient(to bottom,black,transparent 90%); }
+.orb { position:absolute; width:520px; height:520px; right:-160px; top:18%; border-radius:50%; background:radial-gradient(circle,rgba(216,255,67,.14),transparent 64%); filter:blur(8px); }
+.hero-content { position:relative; z-index:2; max-width:1080px; }
+.kicker { display:flex; align-items:center; gap:10px; margin-bottom:28px; }
+.kicker:before { content:""; width:42px; height:1px; background:var(--acid); }
+h1 { font-size:clamp(62px,10vw,148px); line-height:.83; letter-spacing:-.085em; margin:0; max-width:1100px; font-weight:800; }
+.hero-sub { max-width:720px; color:var(--muted); font-size:clamp(17px,2vw,23px); line-height:1.55; margin:42px 0 0; }
+.hero-bottom { display:flex; justify-content:space-between; align-items:end; margin-top:70px; gap:30px; }
+.scroll-note { color:var(--muted); }
+.hero-stat { font-size:clamp(35px,5vw,70px); font-weight:700; letter-spacing:-.07em; }
+.hero-stat small { display:block; font:500 10px "DM Mono"; color:var(--muted); letter-spacing:.13em; text-transform:uppercase; margin-top:5px; }
+
+.marquee { border-top:1px solid var(--line); border-bottom:1px solid var(--line); overflow:hidden; background:var(--acid); color:#070807; transform:rotate(-1deg) scale(1.02); }
+.marquee-track { display:flex; width:max-content; padding:18px 0; }
+.marquee-item { display:flex; align-items:center; gap:28px; padding:0 24px; font-size:clamp(20px,2.5vw,34px); font-weight:800; letter-spacing:-.05em; white-space:nowrap; }
+.marquee-item b { font-family:"DM Mono"; font-size:14px; }
+
+.section { padding:150px 0; }
+.section-head { display:grid; grid-template-columns:.7fr 2fr; gap:50px; margin-bottom:70px; }
+.eyebrow { color:var(--acid); }
+.display { font-size:clamp(40px,6vw,82px); line-height:.95; letter-spacing:-.065em; margin:0; max-width:950px; }
+.copy { color:var(--muted); line-height:1.75; font-size:17px; max-width:760px; }
+.story { display:grid; grid-template-columns:1.25fr .75fr; gap:100px; }
+.story-text p { font-size:clamp(22px,3vw,39px); line-height:1.25; letter-spacing:-.035em; margin:0 0 28px; }
+.story-text p:first-child { color:var(--ink); }
+.story-side { border-left:1px solid var(--line); padding-left:34px; }
+.quote { font-size:clamp(26px,4vw,54px); line-height:1.05; letter-spacing:-.055em; margin:0; }
+
+.convergence { background:var(--panel); border-block:1px solid var(--line); padding:100px 0; }
+.convergence-grid { display:grid; grid-template-columns:1fr 1.7fr; gap:70px; align-items:center; }
+.radar { position:relative; aspect-ratio:1; max-width:520px; margin:auto; display:grid; place-items:center; }
+.radar:before,.radar:after { content:""; position:absolute; border:1px solid var(--line); border-radius:50%; }
+.radar:before { inset:10%; } .radar:after { inset:25%; }
+.radar-center { width:170px; height:170px; border:1px solid var(--acid); background:var(--soft); display:grid; place-items:center; text-align:center; font-weight:800; letter-spacing:-.04em; position:relative; z-index:2; box-shadow:0 0 80px rgba(216,255,67,.09); }
+.node { position:absolute; padding:9px 13px; border:1px solid var(--line); background:#0a0c0a; font:500 10px "DM Mono"; text-transform:uppercase; letter-spacing:.08em; }
+.n1 {top:2%;left:50%;transform:translateX(-50%)} .n2{right:0;top:50%;transform:translateY(-50%)}
+.n3{bottom:2%;left:50%;transform:translateX(-50%)} .n4{left:0;top:50%;transform:translateY(-50%)}
+.n5{top:18%;left:10%} .n6{bottom:18%;right:10%}
+
+.cards { display:grid; grid-template-columns:repeat(4,1fr); border-top:1px solid var(--line); border-left:1px solid var(--line); }
+.stake-card { min-height:260px; padding:28px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); position:relative; transition:.45s cubic-bezier(.2,.8,.2,1); overflow:hidden; }
+.stake-card:before { content:""; position:absolute; inset:auto 0 0; height:0; background:var(--acid); transition:.45s; z-index:0; }
+.stake-card:hover { transform:translateY(-10px); color:#070807; }
+.stake-card:hover:before { height:100%; }
+.stake-card > * { position:relative; z-index:1; }
+.mini { font:500 10px "DM Mono"; color:var(--acid); text-transform:uppercase; }
+.stake-card:hover .mini { color:#070807; }
+.stake-card h3 { font-size:26px; letter-spacing:-.05em; margin:45px 0 14px; }
+.stake-card p { color:var(--muted); line-height:1.6; font-size:14px; max-width:230px; }
+.stake-card:hover p { color:#20261c; }
+.card-line { width:30px; height:2px; background:var(--acid); margin-top:28px; }
+.stake-card:hover .card-line { background:#070807; }
+
+.split { display:grid; grid-template-columns:1fr 1fr; gap:2px; background:var(--line); }
+.panel { background:var(--bg); padding:75px 7%; min-height:430px; }
+.panel h2 { font-size:clamp(38px,5vw,68px); line-height:.95; letter-spacing:-.06em; margin:0 0 30px; }
+.principle { border-top:1px solid var(--line); padding:22px 0; display:grid; grid-template-columns:130px 1fr; gap:20px; }
+.principle span { color:var(--acid); font:500 11px "DM Mono"; text-transform:uppercase; }
+.principle p { color:var(--muted); margin:0; line-height:1.55; }
+
+.intake-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.intake-card { min-height:340px; border:1px solid var(--line); padding:30px; position:relative; transition:.4s; background:linear-gradient(135deg,rgba(255,255,255,.025),transparent); }
+.intake-card:hover { transform:translateY(-12px) rotate(-1deg); border-color:rgba(216,255,67,.55); box-shadow:0 20px 60px rgba(0,0,0,.25); }
+.number { color:var(--acid); font:500 11px "DM Mono"; }
+.intake-card h3 { font-size:32px; letter-spacing:-.055em; margin-top:110px; }
+.intake-card p { color:var(--muted); line-height:1.6; }
+.arrow { position:absolute; right:28px; top:28px; font-size:28px; transition:.3s; }
+.intake-card:hover .arrow { transform:translate(7px,-7px); color:var(--acid); }
+
+.pipeline { background:var(--acid); color:#080a08; padding:100px 0; overflow:hidden; }
+.pipeline .eyebrow { color:#080a08; }
+.pipeline .display { max-width:800px; }
+.pipe-list { margin-top:60px; border-top:1px solid rgba(8,10,8,.25); }
+.pipe-step { display:grid; grid-template-columns:100px 1fr; gap:30px; padding:30px 0; border-bottom:1px solid rgba(8,10,8,.25); transition:.35s; }
+.pipe-step:hover { padding-left:18px; }
+.pipe-step > span { font:500 11px "DM Mono"; }
+.pipe-step h3 { margin:0; font-size:30px; letter-spacing:-.04em; }
+.pipe-step p { margin:8px 0 0; max-width:650px; line-height:1.5; }
+
+.tech-wrap { display:flex; flex-wrap:wrap; gap:9px; margin-top:35px; }
+.tech-pill { border:1px solid var(--line); padding:10px 14px; font:500 11px "DM Mono"; color:var(--muted); transition:.25s; }
+.tech-pill:hover { border-color:var(--acid); color:var(--acid); transform:translateY(-4px); }
+
+.footer { padding:80px 0 35px; border-top:1px solid var(--line); }
+.footer-top { display:flex; justify-content:space-between; gap:30px; align-items:end; }
+.footer-title { font-size:clamp(45px,8vw,110px); line-height:.85; letter-spacing:-.075em; font-weight:800; }
+.footer p { color:var(--muted); max-width:500px; line-height:1.6; }
+.footer-bottom { display:flex; justify-content:space-between; border-top:1px solid var(--line); margin-top:80px; padding-top:20px; color:var(--muted); }
+
+.cursor-dot { width:9px;height:9px;border-radius:50%;background:var(--acid);position:fixed;pointer-events:none;z-index:100;mix-blend-mode:difference;display:none; }
+.reveal { opacity:0; transform:translateY(35px); }
+.split-word { display:inline-block; overflow:hidden; vertical-align:bottom; }
+.split-word > span { display:inline-block; transform:translateY(110%); }
+
+
+.nav-actions { display:flex; align-items:center; gap:9px; }
+.theme-toggle {
+  border:1px solid var(--line); background:transparent; color:var(--ink);
+  padding:11px 13px; cursor:pointer; display:flex; align-items:center; gap:8px;
+  transition:.3s cubic-bezier(.2,.8,.2,1);
+}
+.theme-toggle:hover { border-color:var(--acid); color:var(--acid); transform:translateY(-3px) scale(1.04); }
+.theme-icon { font-size:14px; line-height:1; }
+.theme-label { font-size:10px; }
+body.light .theme-icon { transform:rotate(180deg); }
+
+.camera-drop {
+  position:fixed; inset:0; z-index:200; background:#020302; display:grid; place-items:center;
+  pointer-events:none; overflow:hidden;
+}
+.camera-drop:before {
+  content:""; position:absolute; inset:0;
+  background:radial-gradient(circle at center, transparent 0 12%, rgba(216,255,67,.08) 32%, transparent 62%);
+}
+.camera-grid {
+  position:absolute; inset:-30%;
+  background-image:linear-gradient(rgba(216,255,67,.12) 1px,transparent 1px),
+                    linear-gradient(90deg,rgba(216,255,67,.12) 1px,transparent 1px);
+  background-size:80px 80px; transform:perspective(500px) rotateX(58deg) translateY(35%);
+}
+.camera-crosshair {
+  width:74px; height:74px; border:1px solid var(--acid); position:relative;
+  box-shadow:0 0 35px rgba(216,255,67,.28);
+}
+.camera-crosshair:before,.camera-crosshair:after { content:""; position:absolute; background:var(--acid); }
+.camera-crosshair:before { width:120px;height:1px;left:-24px;top:36px; }
+.camera-crosshair:after { width:1px;height:120px;left:36px;top:-24px; }
+.camera-label { position:absolute; bottom:35px; color:var(--acid); }
+
+.scroll-progress {
+  position:fixed; z-index:80; left:0; top:0; height:2px; width:0;
+  background:var(--acid); box-shadow:0 0 14px var(--acid); pointer-events:none;
+}
+.cursor-ring {
+  width:34px;height:34px;border:1px solid var(--acid);border-radius:50%;
+  position:fixed;pointer-events:none;z-index:99;display:none;mix-blend-mode:difference;
+}
+.hero-content { perspective:900px; }
+.hero-content > * { transform-style:preserve-3d; }
+.hero h1 { text-shadow:0 0 0 transparent; }
+.hero h1:hover { text-shadow:0 0 55px var(--soft); }
+
+.section .display, .story-text p, .quote, .copy, .panel h2, .intake-card h3,
+.stake-card h3, .pipe-step h3, .footer-title {
+  will-change:transform,opacity,filter;
+}
+
+.stake-card, .intake-card, .panel, .principle, .pipe-step, .tech-pill {
+  transform-style:preserve-3d;
+  backface-visibility:hidden;
+}
+
+.stake-card:hover { box-shadow:0 28px 80px var(--shadow); }
+.intake-card:hover { box-shadow:0 28px 80px var(--shadow), 0 0 30px var(--soft); }
+
+.radar-center {
+  animation:pulseCore 2.8s ease-in-out infinite;
+}
+@keyframes pulseCore {
+  0%,100% { box-shadow:0 0 45px var(--soft); }
+  50% { box-shadow:0 0 110px var(--soft); }
+}
+
+body.light .marquee { background:var(--acid); color:#fff; }
+body.light .marquee-item b { color:#fff; }
+body.light .radar-center { color:var(--ink); }
+body.light .camera-drop { background:#fffaf8; }
+body.light .camera-grid { background-image:linear-gradient(rgba(217,39,28,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(217,39,28,.10) 1px,transparent 1px); }
+body.light .camera-crosshair { border-color:var(--acid); }
+body.light .camera-crosshair:before, body.light .camera-crosshair:after { background:var(--acid); }
+
+@media (pointer:fine) {
+  .stake-card, .intake-card, .nav-cta, .theme-toggle, .tech-pill { cursor:none; }
+}
+
+@media(max-width:900px) {
+  .nav-links { display:none; } .hero { padding-top:130px; }
+  .hero-bottom,.footer-top { flex-direction:column; align-items:flex-start; }
+  .section-head,.story,.convergence-grid,.split { grid-template-columns:1fr; gap:40px; }
+  .cards { grid-template-columns:repeat(2,1fr); }
+  .intake-grid { grid-template-columns:1fr; }
+  .panel { min-height:auto; }
+}
+@media(max-width:560px) {
+  .container { width:min(var(--max),calc(100% - 30px)); }
+  .section { padding:95px 0; } .cards { grid-template-columns:1fr; }
+  .story-side { padding-left:20px; }
+  .radar { max-width:340px; } .radar-center { width:125px;height:125px;font-size:13px; }
+  .node { font-size:8px; } .n5,.n6 { display:none; }
+  .pipe-step { grid-template-columns:55px 1fr; }
+  .footer-bottom { flex-direction:column; gap:10px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  html { scroll-behavior:auto; } *,*:before,*:after { animation-duration:.01ms!important; transition-duration:.01ms!important; }
+  .reveal,.split-word > span { opacity:1!important; transform:none!important; }
+}
+</style>
 </head>
+
 <body>
-    <h1>Hello, World!</h1>
-    <h3>Test Content</h3>
-    <script src="script.js"></script>
+<div class="camera-drop" id="camera-drop">
+  <div class="camera-grid"></div>
+  <div class="camera-crosshair"></div>
+  <div class="camera-label mono">ENSURETECH / SYSTEM ONLINE</div>
+</div>
+<div class="cursor-dot"></div>
+<div class="cursor-ring"></div>
+<div class="scroll-progress" id="scroll-progress"></div>
+
+<nav id="nav">
+  <div class="container nav-inner">
+    <a class="logo" href="#"><span class="logo-mark"><i></i></span> ENSURETECH</a>
+    <div class="nav-links">
+      <a href="#story">Story</a><a href="#ecosystem">Ecosystem</a><a href="#platform">Platform</a><a href="#principles">Principles</a>
+    </div>
+    <div class="nav-actions">
+      <a class="nav-cta mono" href="https://ensuretechinsurancebrokers.github.io/contact_us.html">Contact us →</a>
+      <button class="theme-toggle mono" id="theme-toggle" type="button" aria-label="Switch to light mode">
+        <span class="theme-icon">☾</span><span class="theme-label">DARK</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-grid"></div><div class="orb"></div>
+  <div class="container hero-content">
+    <div class="kicker mono"><span class="acid">ABOUT / 001</span> THE OPERATIONAL LAYER</div>
+    <h1 id="hero-title">Insurance<br><span class="acid">converges</span><br>here.</h1>
+    <p class="hero-sub">Where brokers, TPAs, insurers, employers, and HR teams converge onto a single, validated, auditable onboarding layer.</p>
+    <div class="hero-bottom">
+      <div class="scroll-note mono">Scroll to explore<br>↓</div>
+      <div class="hero-stat"><span id="stat">01</span><small>shared operational truth</small></div>
+    </div>
+  </div>
+</header>
+
+<div class="marquee">
+  <div class="marquee-track" id="marquee-track">
+    <div class="marquee-item">VALIDATE <b>✦</b> STANDARDIZE <b>✦</b> CONVERGE <b>✦</b> AUDIT <b>✦</b></div><div class="marquee-item">VALIDATE <b>✦</b> STANDARDIZE <b>✦</b> CONVERGE <b>✦</b> AUDIT <b>✦</b></div><div class="marquee-item">VALIDATE <b>✦</b> STANDARDIZE <b>✦</b> CONVERGE <b>✦</b> AUDIT <b>✦</b></div><div class="marquee-item">VALIDATE <b>✦</b> STANDARDIZE <b>✦</b> CONVERGE <b>✦</b> AUDIT <b>✦</b></div>
+  </div>
+</div>
+
+<section class="section" id="story">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow mono">/ 002 — OUR STORY</div>
+      <h2 class="display">Insurance onboarding infrastructure for the modern ecosystem.</h2>
+    </div>
+    <div class="story">
+      <div class="story-text">
+        <p>Insurance onboarding should not feel like a battle against spreadsheets, inconsistent data, and avoidable reconciliation.</p>
+        <p>Ensuretech was created around a simple idea: build the shared infrastructure layer that lets the insurance ecosystem work from validated operational truth.</p>
+        <p>Instead of another isolated portal, we are building a convergence platform where data enters once, moves through resilient workflows, and becomes useful to every stakeholder that needs it.</p>
+      </div>
+      <aside class="story-side">
+        <p class="mono acid">THE THESIS</p>
+        <p class="quote">“Data enters once. It becomes useful everywhere.”</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="convergence" id="ecosystem">
+  <div class="container convergence-grid">
+    <div>
+      <div class="eyebrow mono">/ 003 — CONVERGENCE</div>
+      <h2 class="display" style="margin-top:22px">One layer.<br>Many stakeholders.</h2>
+      <p class="copy" style="margin-top:30px">The insurance onboarding ecosystem is interconnected. Ensuretech is designed around that reality: a neutral operational layer connecting the parties that create, validate, consume, and operate enrollment data.</p>
+    </div>
+    <div class="radar" id="radar">
+      <div class="node n1">BROKERS</div><div class="node n2">TPAs</div><div class="node n3">INSURERS</div>
+      <div class="node n4">EMPLOYERS</div><div class="node n5">HR TEAMS</div><div class="node n6">OPERATIONS</div>
+      <div class="radar-center">ENSURETECH<br><span class="mono acid">CONVERGENCE</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="stakeholders">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow mono">/ 004 — WHO WE SERVE</div>
+      <h2 class="display">Built around the shared pain layer.</h2>
+    </div>
+    <div class="cards"><article class="stake-card reveal"><span class="mini">Brokers</span><h3>Brokers</h3><p>Less onboarding overhead and fewer rejection loops.</p><div class="card-line"></div></article><article class="stake-card reveal"><span class="mini">TPAs</span><h3>TPAs</h3><p>Cleaner enrollment data and less reconciliation.</p><div class="card-line"></div></article><article class="stake-card reveal"><span class="mini">Insurers</span><h3>Insurers</h3><p>More consistent ingestion and clearer auditability.</p><div class="card-line"></div></article><article class="stake-card reveal"><span class="mini">Employers &amp; HR</span><h3>Employers &amp; HR</h3><p>Better onboarding experiences and faster validation.</p><div class="card-line"></div></article><article class="stake-card reveal"><span class="mini">Operations</span><h3>Operations</h3><p>Less manual reconciliation and stronger observability.</p><div class="card-line"></div></article></div>
+  </div>
+</section>
+
+<section class="section" id="principles" style="padding-top:50px">
+  <div class="container">
+    <div class="split">
+      <div class="panel">
+        <div class="eyebrow mono">/ 005 — VISION</div>
+        <h2>A world where insurance onboarding is invisible infrastructure — where brokers, TPAs, insurers, and employers converge on a single operational layer, and the friction of enrollment simply disappears.</h2>
+      </div>
+      <div class="panel">
+        <div class="eyebrow mono">/ MISSION</div>
+        <p class="copy" style="font-size:22px;color:var(--ink);margin-top:35px">Build resilient, neutral, standards-driven onboarding infrastructure that reduces Excel chaos, validates data before it enters the ecosystem, and helps every stakeholder spend less time reconciling and more time serving.</p>
+        <div style="margin-top:50px"><div class="principle reveal"><span>Neutral</span><p>Built for the ecosystem, not one side of it.</p></div><div class="principle reveal"><span>Resilient</span><p>Designed around isolation, retries, backpressure, and graceful failure.</p></div><div class="principle reveal"><span>Auditable</span><p>Operational events and validation are designed to remain traceable.</p></div><div class="principle reveal"><span>Configurable</span><p>Differences between partners can be handled through configuration rather than endless code branches.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="platform">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow mono">/ 006 — PLATFORM</div>
+      <h2 class="display">Three doors.<br>One downstream flow.</h2>
+    </div>
+    <div class="intake-grid"><article class="intake-card reveal"><span class="number">01</span><h3>GUI Editor</h3><p>An Excel-like experience with inline validation and live feedback.</p><span class="arrow">↗</span></article><article class="intake-card reveal"><span class="number">02</span><h3>CSV Upload</h3><p>Structured ingestion designed for broker and HRMS data, with schema negotiation and normalization.</p><span class="arrow">↗</span></article><article class="intake-card reveal"><span class="number">03</span><h3>Test Runner</h3><p>Isolated edge-case and resilience testing without mixing test activity with production data.</p><span class="arrow">↗</span></article></div>
+  </div>
+</section>
+
+<section class="pipeline">
+  <div class="container">
+    <div class="eyebrow mono">/ 007 — HOW IT WORKS</div>
+    <h2 class="display" style="margin-top:22px">From intake to<br>operational truth.</h2>
+    <div class="pipe-list"><div class="pipe-step reveal"><span>01</span><div><h3>Ingest</h3><p>Accept data without blocking the user.</p></div></div><div class="pipe-step reveal"><span>02</span><div><h3>Validate</h3><p>Catch structural and business-data issues early.</p></div></div><div class="pipe-step reveal"><span>03</span><div><h3>Process</h3><p>Move work through asynchronous, isolated workloads.</p></div></div><div class="pipe-step reveal"><span>04</span><div><h3>Audit</h3><p>Preserve operational visibility across the lifecycle.</p></div></div></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow mono">/ 008 — TECHNOLOGY</div>
+      <h2 class="display">Open technologies.<br>Serious infrastructure.</h2>
+    </div>
+    <p class="copy">The platform is built around modern, open-source technologies selected to support resilient services, asynchronous workloads, structured data, event streaming, and observable operations.</p>
+    <div class="tech-wrap"><span class="tech-pill">Python</span><span class="tech-pill">Java</span><span class="tech-pill">Django</span><span class="tech-pill">Spring Boot</span><span class="tech-pill">PostgreSQL</span><span class="tech-pill">Kafka</span><span class="tech-pill">RabbitMQ</span><span class="tech-pill">Docker</span><span class="tech-pill">Next.js</span><span class="tech-pill">Svelte</span></div>
+  </div>
+</section>
+
+<footer class="footer" id="contact">
+  <div class="container">
+    <div class="footer-top">
+      <div>
+        <div class="mono acid">ENSURETECH™</div>
+        <div class="footer-title">Operational<br><span class="acid">infrastructure.</span></div>
+      </div>
+      <p>Where the insurance ecosystem converges.<br><br>Built with resilience-first principles for the realities of insurance onboarding.</p>
+    </div>
+    <div class="footer-bottom mono">
+      <span>© Ensuretech</span><span>Insurance onboarding infrastructure</span><span>CONVERGE →</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const body = document.body;
+const themeToggle = document.querySelector("#theme-toggle");
+const themeIcon = document.querySelector(".theme-icon");
+const themeLabel = document.querySelector(".theme-label");
+const cameraDrop = document.querySelector("#camera-drop");
+
+function setTheme(light) {
+  body.classList.toggle("light", light);
+  themeIcon.textContent = light ? "☀" : "☾";
+  themeLabel.textContent = light ? "LIGHT" : "DARK";
+  themeToggle.setAttribute("aria-label", light ? "Switch to dark mode" : "Switch to light mode");
+  localStorage.setItem("ensuretech-theme", light ? "light" : "dark");
+}
+const savedTheme = localStorage.getItem("ensuretech-theme");
+setTheme(savedTheme === "light");
+
+themeToggle.addEventListener("click", () => setTheme(!body.classList.contains("light")));
+
+if (!reduceMotion) {
+  // Cinematic "camera drop" opening: zoom, tilt, scanline reveal.
+  const cam = gsap.timeline({ defaults:{ ease:"power4.inOut" } });
+  cam.to(".camera-crosshair", { scale:3.8, opacity:0, duration:1.15, ease:"expo.in" })
+     .to(".camera-grid", { yPercent:-35, opacity:0, duration:.95 }, "<")
+     .to(".camera-label", { y:20, opacity:0, duration:.45 }, "<")
+     .to(cameraDrop, { clipPath:"inset(0 0 100% 0)", duration:1.05, ease:"power4.inOut" }, "-=.2")
+     .set(cameraDrop, { display:"none" });
+
+  // Hero entrance.
+  const heroTl = gsap.timeline({ defaults:{ ease:"power4.out" } });
+  heroTl.from(".nav-inner", { y:-25, opacity:0, duration:.8 }, "-=.25")
+        .from(".kicker", { x:-35, opacity:0, duration:.65 }, "-=.45")
+        .from("#hero-title", { y:100, rotateX:18, opacity:0, duration:1.2 }, "-=.25")
+        .from(".hero-sub", { y:45, filter:"blur(12px)", opacity:0, duration:.85 }, "-=.65")
+        .from(".hero-bottom", { y:30, opacity:0, duration:.6 }, "-=.45");
+
+  // Every meaningful text block gets a scroll-driven cinematic reveal.
+  gsap.utils.toArray("section h2, section h3, section p, .eyebrow, .footer-title, .footer p, .tech-pill").forEach((el) => {
+    gsap.fromTo(el,
+      { y:55, opacity:0, rotateX:7, filter:"blur(7px)" },
+      { y:0, opacity:1, rotateX:0, filter:"blur(0px)", duration:.9, ease:"power3.out",
+        scrollTrigger:{ trigger:el, start:"top 88%", end:"top 58%", scrub:.7 } }
+    );
+  });
+
+  // Staggered card appearances.
+  gsap.utils.toArray(".reveal").forEach((el) => {
+    gsap.fromTo(el, { opacity:0, y:45, scale:.96 }, {
+      opacity:1, y:0, scale:1, duration:.8, ease:"power3.out",
+      scrollTrigger:{ trigger:el, start:"top 86%", once:true }
+    });
+  });
+
+  // Infinite conveyor belt.
+  gsap.to("#marquee-track", { xPercent:-50, duration:18, ease:"none", repeat:-1 });
+
+  // Rotating convergence network.
+  gsap.to("#radar", { rotation:360, duration:35, repeat:-1, ease:"none" });
+  gsap.to(".radar-center", { rotation:-360, duration:35, repeat:-1, ease:"none" });
+
+  // Hero parallax.
+  gsap.to(".orb", {
+    yPercent:25, scale:1.12, ease:"none",
+    scrollTrigger:{ trigger:".hero", start:"top top", end:"bottom top", scrub:true }
+  });
+
+  // Pipeline stagger.
+  gsap.from(".pipe-step", {
+    x:-60, opacity:0, duration:.7, stagger:.12, ease:"power3.out",
+    scrollTrigger:{ trigger:".pipe-list", start:"top 78%" }
+  });
+
+  // Tech pills pop.
+  gsap.from(".tech-pill", {
+    scale:.78, opacity:0, duration:.45, stagger:.045, ease:"back.out(1.7)",
+    scrollTrigger:{ trigger:".tech-wrap", start:"top 85%" }
+  });
+
+  // Scroll progress.
+  const progress = document.querySelector("#scroll-progress");
+  window.addEventListener("scroll", () => {
+    const max = document.documentElement.scrollHeight - innerHeight;
+    gsap.to(progress, { width:(scrollY / max * 100) + "%", duration:.15, overwrite:true });
+  });
+
+  // Camera-like 3D tilt on cards.
+  document.querySelectorAll(".stake-card, .intake-card").forEach(el => {
+    el.addEventListener("mousemove", e => {
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - .5;
+      const py = (e.clientY - r.top) / r.height - .5;
+      gsap.to(el, {
+        rotateY:px*8, rotateX:-py*8, x:px*5, y:py*5,
+        duration:.35, ease:"power2.out"
+      });
+    });
+    el.addEventListener("mouseleave", () => {
+      gsap.to(el, { rotateY:0, rotateX:0, x:0, y:0, duration:.7, ease:"elastic.out(1,.45)" });
+    });
+  });
+}
+
+// Nav state.
+window.addEventListener("scroll", () => {
+  document.querySelector("#nav").classList.toggle("scrolled", scrollY > 30);
+});
+
+// Custom cursor + ring.
+if (window.matchMedia("(pointer:fine)").matches && !reduceMotion) {
+  const dot = document.querySelector(".cursor-dot");
+  const ring = document.querySelector(".cursor-ring");
+  dot.style.display = "block";
+  ring.style.display = "block";
+  let mx=0,my=0,dx=0,dy=0,rx=0,ry=0;
+  window.addEventListener("mousemove", e => { mx=e.clientX; my=e.clientY; });
+  gsap.ticker.add(() => {
+    dx += (mx-dx)*.2; dy += (my-dy)*.2;
+    rx += (mx-rx)*.09; ry += (my-ry)*.09;
+    gsap.set(dot, {x:dx-4.5,y:dy-4.5});
+    gsap.set(ring, {x:rx-17,y:ry-17});
+  });
+
+  document.querySelectorAll("a, button, .stake-card, .intake-card, .tech-pill").forEach(el => {
+    el.addEventListener("mouseenter", () => gsap.to(ring, {scale:1.55, duration:.25}));
+    el.addEventListener("mouseleave", () => gsap.to(ring, {scale:1, duration:.3}));
+  });
+}
+
+// Magnetic controls.
+if (!reduceMotion) {
+  document.querySelectorAll(".nav-cta, .theme-toggle").forEach(el => {
+    el.addEventListener("mousemove", e => {
+      const r=el.getBoundingClientRect();
+      const x=(e.clientX-r.left-r.width/2)/r.width*12;
+      const y=(e.clientY-r.top-r.height/2)/r.height*12;
+      gsap.to(el, {x,y,duration:.25,ease:"power2.out"});
+    });
+    el.addEventListener("mouseleave", () =>
+      gsap.to(el, {x:0,y:0,duration:.45,ease:"elastic.out(1,.4)"})
+    );
+  });
+}
+</script>
 </body>
 </html>
