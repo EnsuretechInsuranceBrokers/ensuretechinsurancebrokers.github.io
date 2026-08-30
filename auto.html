@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Endorsement Add-Sheet Generator</title>
+<meta name="description" content="Generate realistic, validation-safe bulk-upload test data for insurance endorsement add-sheets — entirely in your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --paper:#EEF1EA;
+  --surface:#FFFFFF;
+  --surface-2:#F7F8F4;
+  --ink:#182821;
+  --ink-soft:#4C5D55;
+  --ink-faint:#8A978F;
+  --line:#D7DCD0;
+  --line-strong:#B9C2B1;
+  --accent:#C07C25;
+  --accent-ink:#5A3B10;
+  --accent-soft:#F3E3C6;
+  --good:#2E6B54;
+  --good-soft:#DCEBE2;
+  --bad:#AB3B31;
+  --bad-soft:#F5DEDA;
+  --radius:10px;
+  --shadow:0 1px 2px rgba(24,40,33,.06), 0 8px 24px -12px rgba(24,40,33,.18);
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --display: 'Space Grotesk', var(--sans);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:14.5px;
+  line-height:1.5;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 100% 34px, 34px 100%;
+  background-position: 0 64px, 0 0;
+  background-attachment: local, local;
+}
+::selection{background:var(--accent-soft); color:var(--accent-ink);}
+a{color:var(--accent-ink);}
+h1,h2,h3{font-family:var(--display); font-weight:600; margin:0 0 4px;}
+code, .mono{font-family:var(--mono);}
+button{font-family:var(--sans);}
+
+/* ---------- Top bar ---------- */
+.topbar{
+  position:sticky; top:0; z-index:40;
+  background:rgba(238,241,234,.92);
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--line-strong);
+}
+.topbar-inner{
+  max-width:1180px; margin:0 auto; padding:14px 24px;
+  display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+}
+.brand{display:flex; align-items:center; gap:12px;}
+.brand-mark{
+  width:34px;height:34px;border-radius:8px;
+  background:var(--ink); color:var(--paper);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono); font-weight:600; font-size:15px;
+  transform:rotate(-3deg);
+}
+.brand-text h1{font-size:17px; letter-spacing:-.01em;}
+.brand-text p{margin:0; font-size:12px; color:var(--ink-soft);}
+.counter-badge{
+  font-family:var(--mono); font-size:12px; color:var(--ink-soft);
+  background:var(--surface); border:1px solid var(--line-strong);
+  border-radius:999px; padding:6px 12px; display:flex; align-items:center; gap:8px;
+  box-shadow:var(--shadow);
+}
+.counter-badge b{color:var(--accent-ink); font-size:13px;}
+.counter-dot{width:6px;height:6px;border-radius:50%;background:var(--good); box-shadow:0 0 0 3px var(--good-soft);}
+
+/* ---------- Layout ---------- */
+.layout{max-width:1180px; margin:0 auto; padding:28px 24px 80px; display:grid; grid-template-columns:212px 1fr; gap:28px;}
+@media (max-width:900px){ .layout{grid-template-columns:1fr;} .railnav{display:none;} }
+
+.railnav{position:sticky; top:74px; align-self:start;}
+.railnav ol{list-style:none; margin:0; padding:0; border-left:2px solid var(--line);}
+.railnav li{position:relative; padding:8px 0 8px 20px;}
+.railnav li::before{
+  content:attr(data-n); position:absolute; left:-11px; top:6px;
+  width:20px;height:20px;border-radius:50%;
+  background:var(--surface); border:2px solid var(--line-strong);
+  font-family:var(--mono); font-size:10px; color:var(--ink-soft);
+  display:flex;align-items:center;justify-content:center;
+}
+.railnav a{display:block; font-size:12.5px; font-weight:500; color:var(--ink-soft); text-decoration:none;}
+.railnav a:hover{color:var(--ink);}
+.railnav li.done::before{background:var(--good); border-color:var(--good); color:#fff;}
+
+main{min-width:0;}
+.lede{margin-bottom:22px;}
+.lede h2{font-size:22px;}
+.lede p{color:var(--ink-soft); max-width:62ch; margin:6px 0 0;}
+
+.card{
+  background:var(--surface); border:1px solid var(--line-strong);
+  border-radius:var(--radius); box-shadow:var(--shadow);
+  padding:22px 24px; margin-bottom:20px; scroll-margin-top:80px;
+}
+.card-head{display:flex; align-items:baseline; gap:10px; margin-bottom:4px;}
+.card-num{
+  font-family:var(--mono); font-size:11px; color:var(--accent-ink);
+  background:var(--accent-soft); border-radius:5px; padding:2px 7px;
+}
+.card h3{font-size:16.5px;}
+.card > .sub{color:var(--ink-soft); font-size:12.5px; margin:2px 0 16px;}
+
+.field-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px; margin-bottom:14px;}
+.field{display:flex; flex-direction:column; gap:5px;}
+.field label{font-size:12px; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em;}
+.field .hint{font-size:11.5px; color:var(--ink-faint); font-weight:400; text-transform:none; letter-spacing:0;}
+input[type=text],input[type=number],input[type=date],select,textarea{
+  font-family:var(--sans); font-size:13.5px; color:var(--ink);
+  background:var(--surface-2); border:1px solid var(--line-strong); border-radius:7px;
+  padding:8px 10px; width:100%;
+}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent); outline-offset:1px; background:var(--surface);}
+textarea{font-family:var(--mono); font-size:12.5px; min-height:64px; resize:vertical;}
+.radiogroup{display:flex; gap:8px; flex-wrap:wrap;}
+.chip{
+  display:flex; align-items:center; gap:6px;
+  border:1px solid var(--line-strong); border-radius:999px; padding:6px 13px;
+  font-size:12.5px; cursor:pointer; background:var(--surface-2); user-select:none;
+}
+.chip input{accent-color:var(--accent);}
+.chip.active{background:var(--accent-soft); border-color:var(--accent); color:var(--accent-ink); font-weight:600;}
+.toggle-row{display:flex; align-items:center; gap:10px; padding:9px 0;}
+.toggle-row label{font-size:13px; font-weight:500;}
+.switch{position:relative; width:38px; height:21px; flex:none;}
+.switch input{opacity:0; width:100%; height:100%; margin:0; position:absolute; cursor:pointer;}
+.switch .track{position:absolute; inset:0; background:var(--line-strong); border-radius:999px; transition:.15s;}
+.switch .knob{position:absolute; top:2px; left:2px; width:17px; height:17px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.3); transition:.15s;}
+.switch input:checked + .track{background:var(--good);}
+.switch input:checked + .track .knob{transform:translateX(17px);}
+
+.subpanel{background:var(--surface-2); border:1px dashed var(--line-strong); border-radius:8px; padding:16px; margin-top:6px;}
+.subpanel[hidden]{display:none;}
+
+.btn{
+  font-size:13px; font-weight:600; border-radius:7px; padding:9px 16px; cursor:pointer;
+  border:1px solid var(--line-strong); background:var(--surface); color:var(--ink);
+  display:inline-flex; align-items:center; gap:7px;
+}
+.btn:hover{border-color:var(--ink-soft);}
+.btn.primary{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+.btn.primary:hover{background:#0e1a15;}
+.btn.accent{background:var(--accent); color:#fff; border-color:var(--accent);}
+.btn.accent:hover{background:#a86a1e;}
+.btn:disabled{opacity:.45; cursor:not-allowed;}
+.btn.small{padding:5px 10px; font-size:11.5px;}
+
+.filedrop{
+  border:2px dashed var(--line-strong); border-radius:9px; padding:24px;
+  text-align:center; cursor:pointer; background:var(--surface-2);
+}
+.filedrop.drag{border-color:var(--accent); background:var(--accent-soft);}
+.filedrop p{margin:4px 0; font-size:13px; color:var(--ink-soft);}
+.filedrop strong{color:var(--ink);}
+
+.pill{display:inline-flex; align-items:center; gap:5px; font-family:var(--mono); font-size:11px; padding:3px 8px; border-radius:5px;}
+.pill.ok{background:var(--good-soft); color:var(--good);}
+.pill.no{background:var(--bad-soft); color:var(--bad);}
+
+.colgrid{display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; max-height:220px; overflow:auto; padding:2px;}
+.coltag{
+  font-family:var(--mono); font-size:11px; border-radius:6px; padding:5px 9px;
+  border:1px solid var(--line-strong); background:var(--surface);
+  display:flex; flex-direction:column; gap:2px; min-width:110px;
+}
+.coltag .name{font-weight:600;}
+.coltag .fill{color:var(--ink-faint); font-size:10px;}
+.coltag.rec{border-color:var(--good); background:var(--good-soft);}
+.coltag.rec .fill{color:var(--good);}
+.coltag.unrec{border-color:var(--line-strong); background:var(--surface-2);}
+
+table.previewtbl{border-collapse:collapse; width:100%; font-family:var(--mono); font-size:11.5px;}
+table.previewtbl th, table.previewtbl td{border:1px solid var(--line); padding:6px 9px; text-align:left; white-space:nowrap;}
+table.previewtbl th{background:var(--ink); color:var(--paper); position:sticky; top:0; font-weight:500;}
+table.previewtbl tr:nth-child(even) td{background:var(--surface-2);}
+.tablewrap{overflow:auto; max-height:420px; border:1px solid var(--line-strong); border-radius:8px;}
+
+.progresswrap{background:var(--surface-2); border:1px solid var(--line-strong); border-radius:8px; padding:16px; margin-top:14px;}
+.progressbar{height:8px; border-radius:999px; background:var(--line); overflow:hidden; margin-top:8px;}
+.progressbar > div{height:100%; background:var(--accent); width:0%; transition:width .12s;}
+.progress-stats{display:flex; justify-content:space-between; font-size:12px; color:var(--ink-soft); font-family:var(--mono); margin-top:6px;}
+
+.statgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin:14px 0;}
+.stat{background:var(--surface-2); border:1px solid var(--line-strong); border-radius:8px; padding:12px 14px;}
+.stat b{display:block; font-family:var(--display); font-size:20px;}
+.stat span{font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em;}
+
+.note{font-size:12px; color:var(--ink-soft); background:var(--surface-2); border-left:3px solid var(--accent); padding:9px 12px; border-radius:5px; margin-top:10px;}
+.warn{border-left-color:var(--bad); color:var(--bad);}
+
+footer{max-width:1180px; margin:0 auto; padding:10px 24px 60px; color:var(--ink-faint); font-size:11.5px;}
+footer a{color:var(--ink-soft);}
+</style>
+</head>
+<body>
+<noscript><div style="padding:20px;font-family:sans-serif;background:#F5DEDA;color:#AB3B31;">This tool generates data entirely in your browser and requires JavaScript to be enabled.</div></noscript>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">#01</div>
+      <div class="brand-text">
+        <h1>Endorsement Add-Sheet Generator</h1>
+        <p>Bulk test-data, generated entirely in your browser</p>
+      </div>
+    </div>
+    <div class="counter-badge"><span class="counter-dot"></span>Next employee code <b id="topNextCode">—</b></div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="railnav">
+    <ol>
+      <li data-n="1"><a href="#s-template">Template</a></li>
+      <li data-n="2"><a href="#s-identity">Identity &amp; volume</a></li>
+      <li data-n="3"><a href="#s-rater">Sum insured rule</a></li>
+      <li data-n="4"><a href="#s-family">Dependents</a></li>
+      <li data-n="5"><a href="#s-optional">Optional fields</a></li>
+      <li data-n="6"><a href="#s-generate">Generate &amp; download</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <div class="lede">
+      <h2>Fill out a real add-sheet with fake — but valid — people.</h2>
+      <p>Upload the sample sheet exported for your policy (or use a built-in layout), configure how strict your sum-insured rater is, and generate as many rows as you need. Employee codes and emails are guaranteed unique, even across separate runs on this device.</p>
+    </div>
+
+    <!-- ============ SECTION 1: TEMPLATE ============ -->
+    <section class="card" id="s-template">
+      <div class="card-head"><span class="card-num">1</span><h3>Template</h3></div>
+      <p class="sub">Upload the exact sheet your policy expects — column order and labels are preserved verbatim. No file? Use a built-in layout instead.</p>
+
+      <div class="radiogroup" style="margin-bottom:14px;">
+        <label class="chip active" id="chipUpload"><input type="radio" name="tmplMode" value="upload" checked>Upload my sheet</label>
+        <label class="chip" id="chipBuiltin"><input type="radio" name="tmplMode" value="builtin">Use a built-in layout</label>
+      </div>
+
+      <div id="uploadPanel">
+        <div class="filedrop" id="filedrop">
+          <input type="file" id="tmplFile" accept=".xls,.xlsx" style="display:none">
+          <p><strong>Click to choose</strong> or drop your sample/template .xls / .xlsx here</p>
+          <p style="font-size:11.5px;">Only the header row (row 1) of the first sheet is read.</p>
+        </div>
+        <div id="uploadStatus" class="note" style="display:none;"></div>
+      </div>
+
+      <div id="builtinPanel" style="display:none;">
+        <div class="field-row">
+          <div class="field">
+            <label for="builtinTemplate">Layout</label>
+            <select id="builtinTemplate">
+              <option value="standard">Standard add-sheet (35 columns — mirrors a real production export)</option>
+              <option value="simple">Simple (self + family, 18 core columns)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="columnDetectWrap" style="display:none;">
+        <p class="sub" style="margin-top:16px; margin-bottom:0;"><span id="colRecognizedCount"></span> — columns this tool doesn't recognize are always left blank, never guessed at.</p>
+        <div class="colgrid" id="columnDetect"></div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 2: IDENTITY & VOLUME ============ -->
+    <section class="card" id="s-identity">
+      <div class="card-head"><span class="card-num">2</span><h3>Identity &amp; volume</h3></div>
+      <p class="sub">How many employees, and how their codes / emails / names / dates are built.</p>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="numEmployees">Employees to generate</label>
+          <input type="number" id="numEmployees" value="25" min="1" step="1">
+        </div>
+        <div class="field">
+          <label for="genderMode">Gender mix</label>
+          <select id="genderMode">
+            <option value="random">Random mix</option>
+            <option value="male">All male</option>
+            <option value="female">All female</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Employee age range</label>
+          <div style="display:flex; gap:6px;">
+            <input type="number" id="dobMinAge" value="21" min="18" max="80" aria-label="Minimum employee age">
+            <input type="number" id="dobMaxAge" value="58" min="18" max="80" aria-label="Maximum employee age">
+          </div>
+        </div>
+        <div class="field">
+          <label for="dojMaxYearsAgo">Joined within last (years)</label>
+          <input type="number" id="dojMaxYearsAgo" value="6" min="0" max="40">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="codeFormat">Employee code format</label>
+          <select id="codeFormat">
+            <option value="numeric">Numeric</option>
+            <option value="alphanumeric" selected>Alphanumeric</option>
+            <option value="alpha">Alphabetic</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="codeLength">Code min. length <span class="hint">(grows automatically to stay unique)</span></label>
+          <input type="number" id="codeLength" value="6" min="1" max="20">
+        </div>
+        <div class="field">
+          <label for="codePrefix">Code prefix <span class="hint">(optional)</span></label>
+          <input type="text" id="codePrefix" placeholder="e.g. EMP">
+        </div>
+        <div class="field">
+          <label>Next code starts at</label>
+          <div style="display:flex; gap:6px;">
+            <input type="number" id="startCounter" value="1" min="1" aria-label="Next code starts at">
+            <button class="btn small" id="resetCounterBtn" type="button" title="Reset uniqueness memory back to 1">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="emailDomain">Email domain</label>
+          <input type="text" id="emailDomain" value="testcompany.com">
+        </div>
+        <div class="field">
+          <label for="emailPattern">Email pattern</label>
+          <select id="emailPattern">
+            <option value="code">code@domain</option>
+            <option value="name">firstname.lastname+code@domain</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="namesMode">Name source</label>
+          <select id="namesMode">
+            <option value="builtin">Built-in name list (50 first + 50 last)</option>
+            <option value="custom">Paste my own names</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="subpanel" id="customNamesPanel" hidden>
+        <div class="field-row" style="margin-bottom:0;">
+          <div class="field">
+            <label for="customFirstNames">First names <span class="hint">comma or newline separated</span></label>
+            <textarea id="customFirstNames" placeholder="Alex, Priya, Sam, ..."></textarea>
+          </div>
+          <div class="field">
+            <label for="customLastNames">Last names <span class="hint">comma or newline separated — reuse the first-name list if you only have one</span></label>
+            <textarea id="customLastNames" placeholder="Roy, Fernandes, Iyer, ..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="note" id="uniquenessNote">Uniqueness memory: your browser remembers every code this tool has generated on this device, so re-running the tool tomorrow — or generating a million rows today — never repeats a code or email.</div>
+    </section>
+
+    <!-- ============ SECTION 3: RATER ============ -->
+    <section class="card" id="s-rater">
+      <div class="card-head"><span class="card-num">3</span><h3>Sum insured rule (rater type)</h3></div>
+      <p class="sub">Match this to how your policy is actually configured — it decides which columns get filled and which stay blank, same as the validation logic on upload.</p>
+
+      <div class="field-row">
+        <div class="field" style="grid-column:1/-1; max-width:420px;">
+          <label for="raterType">Rater type</label>
+          <select id="raterType">
+            <option value="flat">Flat — one sum insured for everyone</option>
+            <option value="no_rule">No rule — same as flat, sheet-driven value</option>
+            <option value="grade">Grade-based</option>
+            <option value="designation">Designation-based</option>
+            <option value="salary_multiple">Number-of-times salary</option>
+            <option value="state">State-wise</option>
+            <option value="age">Age-based (no SI column needed)</option>
+            <option value="family_construct">Family construct-wise (no SI column needed)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="subpanel" id="raterPanel-flat">
+        <div class="field-row" style="margin-bottom:0;">
+          <div class="field">
+            <label for="suminsuredValue">Sum insured</label>
+            <input type="number" id="suminsuredValue" value="500000" min="0" step="1000">
+          </div>
+          <div class="field">
+            <label>Also fill OPD sum insured?</label>
+            <div class="toggle-row" style="padding-top:4px;">
+              <div class="switch"><input type="checkbox" id="opdEnabled"><div class="track"><div class="knob"></div></div></div>
+              <label for="opdEnabled">Enable</label>
+            </div>
+          </div>
+          <div class="field" id="opdValueField" hidden>
+            <label for="opdSuminsuredValue">OPD sum insured</label>
+            <input type="number" id="opdSuminsuredValue" value="50000" min="0" step="1000">
+          </div>
+        </div>
+      </div>
+
+      <div class="subpanel" id="raterPanel-grade" hidden>
+        <div class="field">
+          <label for="gradesList">Valid grades for this policy <span class="hint">comma separated — must match your real policy's configured grades</span></label>
+          <textarea id="gradesList">Grade A, Grade B, Grade C, Grade D, Grade E</textarea>
+        </div>
+      </div>
+
+      <div class="subpanel" id="raterPanel-designation" hidden>
+        <div class="field">
+          <label for="designationsList">Valid designations for this policy <span class="hint">comma separated</span></label>
+          <textarea id="designationsList">Executive, Senior Executive, Assistant Manager, Manager, Senior Manager, AVP, VP</textarea>
+        </div>
+      </div>
+
+      <div class="subpanel" id="raterPanel-salary_multiple" hidden>
+        <div class="field-row" style="margin-bottom:0;">
+          <div class="field">
+            <label>Annual salary range</label>
+            <div style="display:flex; gap:6px;">
+              <input type="number" id="salaryMin" value="400000" min="0" step="10000" aria-label="Minimum annual salary">
+              <input type="number" id="salaryMax" value="2000000" min="0" step="10000" aria-label="Maximum annual salary">
+            </div>
+          </div>
+          <div class="field">
+            <label for="salaryMultiplesList">Valid multiples <span class="hint">must match your policy's configured multiples</span></label>
+            <input type="text" id="salaryMultiplesList" value="1, 2, 3">
+          </div>
+        </div>
+      </div>
+
+      <div class="subpanel" id="raterPanel-state" hidden>
+        <div class="field">
+          <label for="statesList">Valid states for this policy <span class="hint">comma separated</span></label>
+          <textarea id="statesList">Maharashtra, Karnataka, Tamil Nadu, Delhi, Gujarat, Rajasthan, Uttar Pradesh, West Bengal, Telangana, Kerala</textarea>
+        </div>
+      </div>
+
+      <div class="note" id="raterNote-age" hidden>Age-based raters compute sum insured from date of birth on the insurer's side — the Suminsured column is intentionally left blank; just make sure your age range (Section 2) sits inside your policy's configured bands.</div>
+      <div class="note" id="raterNote-family_construct" hidden>Family construct raters compute sum insured from how many adults/children are in the family — the Suminsured column is left blank. Turn on <strong>Dependents</strong> below so families actually have a construct to rate.</div>
+    </section>
+
+    <!-- ============ SECTION 4: FAMILY ============ -->
+    <section class="card" id="s-family">
+      <div class="card-head"><span class="card-num">4</span><h3>Dependents</h3></div>
+      <p class="sub">Off by default — each employee is just a "Self" row, like a flat/simple upload. Turn this on to also generate spouse, children and parents.</p>
+
+      <div class="toggle-row">
+        <div class="switch"><input type="checkbox" id="includeFamily"><div class="track"><div class="knob"></div></div></div>
+        <label for="includeFamily">Generate dependents for each employee</label>
+      </div>
+
+      <div class="subpanel" id="familyPanel" hidden>
+        <div class="field-row">
+          <div class="field">
+            <label for="spouseChancePct">% of employees with a spouse</label>
+            <input type="number" id="spouseChancePct" value="55" min="0" max="100">
+          </div>
+          <div class="field">
+            <label for="childChancePct">% of employees with children</label>
+            <input type="number" id="childChancePct" value="45" min="0" max="100">
+          </div>
+          <div class="field">
+            <label>Children count (min–max)</label>
+            <div style="display:flex; gap:6px;">
+              <input type="number" id="childMin" value="1" min="0" max="10" aria-label="Minimum children count">
+              <input type="number" id="childMax" value="2" min="0" max="10" aria-label="Maximum children count">
+            </div>
+          </div>
+          <div class="field">
+            <label for="parentsMode">Parents</label>
+            <select id="parentsMode">
+              <option value="random" selected>Randomly parents, parents-in-law, or none</option>
+              <option value="parents">Always parents (Father/Mother)</option>
+              <option value="parents_in_law">Always parents-in-law</option>
+              <option value="none">Never</option>
+            </select>
+          </div>
+        </div>
+        <div class="toggle-row" style="padding-top:0;">
+          <div class="switch"><input type="checkbox" id="includeDOM" checked><div class="track"><div class="knob"></div></div></div>
+          <label for="includeDOM">Fill Date of Marriage for Self + Spouse (kept consistent between the two rows)</label>
+        </div>
+        <div class="note">A given employee only ever gets parents <em>or</em> parents-in-law, never both — most policies reject mixing the two.</div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 5: OPTIONAL FIELDS ============ -->
+    <section class="card" id="s-optional">
+      <div class="card-head"><span class="card-num">5</span><h3>Optional fields</h3></div>
+      <p class="sub">Everything here is nullable — leave it off and the column stays blank, exactly like the underlying validation allows.</p>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="shouldVerifyEmail">Should Verify Email</label>
+          <select id="shouldVerifyEmail"><option value="">Leave blank</option><option value="No" selected>No</option><option value="Yes">Yes</option></select>
+        </div>
+        <div class="field">
+          <label for="isDummyEmail">Is Dummy Email</label>
+          <select id="isDummyEmail"><option value="">Leave blank</option><option value="Yes">Yes</option><option value="No">No</option></select>
+        </div>
+        <div class="field">
+          <label for="isVip">Is VIP Employee</label>
+          <select id="isVip"><option value="">Leave blank</option><option value="No" selected>No</option><option value="Yes">Yes</option></select>
+        </div>
+        <div class="field">
+          <label for="memberExistingClaim">Member Existing Claim</label>
+          <select id="memberExistingClaim"><option value="">Leave blank</option><option value="NO" selected>NO</option><option value="YES">YES</option></select>
+        </div>
+      </div>
+
+      <div class="toggle-row">
+        <div class="switch"><input type="checkbox" id="mobileEnabled"><div class="track"><div class="knob"></div></div></div>
+        <label for="mobileEnabled">Generate a valid 10-digit Employee Mobile Number</label>
+      </div>
+      <div class="toggle-row">
+        <div class="switch"><input type="checkbox" id="passwordEnabled"><div class="track"><div class="knob"></div></div></div>
+        <label for="passwordEnabled">Generate a Default Password (min. 8 characters)</label>
+      </div>
+      <div class="toggle-row">
+        <div class="switch"><input type="checkbox" id="coverTypeEnabled"><div class="track"><div class="knob"></div></div></div>
+        <label for="coverTypeEnabled">Fill Cover Type</label>
+        <select id="coverTypeValue" style="max-width:160px; margin-left:8px;" aria-label="Cover type value"><option>Individual</option><option>Family Cover</option></select>
+      </div>
+
+      <div class="field-row" style="margin-top:6px;">
+        <div class="field">
+          <label for="batchId">Batch / Insurer Endorsement ID <span class="hint">optional, applied to every row</span></label>
+          <input type="text" id="batchId" placeholder="e.g. QATEST0001">
+        </div>
+        <div class="field">
+          <label for="effectiveDate">Effective / Endorsement date <span class="hint">optional, applied to every row</span></label>
+          <input type="date" id="effectiveDate">
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 6: GENERATE ============ -->
+    <section class="card" id="s-generate">
+      <div class="card-head"><span class="card-num">6</span><h3>Generate &amp; download</h3></div>
+      <p class="sub">Rows are built in your browser in small batches so the tab never freezes, even at very large volumes.</p>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="outputFormat">Output format</label>
+          <select id="outputFormat">
+            <option value="xlsx">Excel (.xlsx)</option>
+            <option value="csv">CSV — recommended above ~50,000 rows</option>
+          </select>
+        </div>
+        <div class="field" style="justify-content:flex-end;">
+          <button class="btn accent" id="generateBtn" type="button">Generate dataset</button>
+        </div>
+      </div>
+
+      <div class="note warn" id="volumeWarning" hidden></div>
+
+      <div class="progresswrap" id="progressWrap" hidden>
+        <div class="progress-stats"><span id="progressLabel">Generating…</span><span id="progressPct">0%</span></div>
+        <div class="progressbar"><div id="progressFill"></div></div>
+      </div>
+
+      <div id="resultsWrap" hidden>
+        <div class="statgrid">
+          <div class="stat"><b id="statEmployees">0</b><span>Employees</span></div>
+          <div class="stat"><b id="statRows">0</b><span>Total rows</span></div>
+          <div class="stat"><b id="statColumns">0</b><span>Columns</span></div>
+          <div class="stat"><b id="statNextCounter">—</b><span>Next code will be</span></div>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:14px;">
+          <button class="btn primary" id="downloadBtn" type="button">Download file</button>
+          <span id="downloadFileName" class="note" style="margin:0; align-self:center; border:none; background:none; padding:0;"></span>
+        </div>
+        <h3 style="font-size:14px; margin-bottom:8px;">Preview <span class="hint" style="font-weight:400; font-size:11.5px;" id="previewHint"></span></h3>
+        <div class="tablewrap"><table class="previewtbl" id="previewTable"></table></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  Runs 100% client-side — nothing you upload or generate ever leaves this browser tab. Built for generating test data only; always keep production employee data out of tools like this.
+</footer>
+
+<script>
+window.CDN_XLSX_LOAD_ERROR = (typeof XLSX === 'undefined');
+</script>
+</body>
+</html>
