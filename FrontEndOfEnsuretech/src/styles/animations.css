@@ -1,0 +1,30 @@
+/* ---------- reveal on scroll ---------- */
+.et-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.et-reveal--in { opacity: 1; transform: translateY(0); }
+
+/* ---------- floating hero stat cards ---------- */
+@keyframes et-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* ---------- timeline data-pulse ---------- */
+@keyframes et-pulse-down {
+  0% { transform: translateY(-10px); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translateY(30px); opacity: 0; }
+}
+
+/* ---------- vision field drifting particles ---------- */
+@keyframes et-drift {
+  0%, 100% { transform: translate(0,0); opacity: 0.2; }
+  50% { transform: translate(12px,-14px); opacity: 0.7; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .et-reveal, .et-glass-card, .et-vision__dot, .et-timeline__pulse { animation: none !important; transition: none !important; }
+}

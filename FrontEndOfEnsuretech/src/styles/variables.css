@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* Design tokens, scoped to the page root so they never leak into
+   a host app if this is embedded elsewhere. */
+.et-root {
+  --bg: #FFFFFF;
+  --card: #FFFFFF;
+  --card-soft: #F3F6FF;
+  --primary: #0052FF;
+  --secondary: #0B0F19;
+  --accent: #FFC24C;
+  --success: #17B26A;
+  --text: #0F1222;
+  --text-2: #5B6472;
+  --border: rgba(11,15,25,0.1);
+  --grad: linear-gradient(90deg, #0052FF 0%, #7C3AED 100%);
+}

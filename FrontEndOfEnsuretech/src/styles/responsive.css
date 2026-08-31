@@ -1,0 +1,12 @@
+@media (max-width: 920px) {
+  .et-hero__grid { grid-template-columns: 1fr; }
+  .et-hero__right { min-height: 320px; margin-top: 30px; }
+  .et-problem__grid { grid-template-columns: 1fr; }
+  .et-feature-grid { grid-template-columns: 1fr 1fr; }
+  .et-story__grid { grid-template-columns: 1fr; gap: 40px; }
+  .et-metrics__grid { grid-template-columns: 1fr 1fr; }
+  .et-team-grid { grid-template-columns: 1fr; }
+  .et-footer__top { grid-template-columns: 1fr 1fr; }
+  .et-nav__links { display: none; }
+  .et-hero__title { font-size: 38px; }
+}
