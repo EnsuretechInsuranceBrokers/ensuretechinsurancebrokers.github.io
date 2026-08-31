@@ -1,0 +1,90 @@
+/* ---------- page root ---------- */
+.et-root {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.5;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.et-root::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(11,15,25,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11,15,25,0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
+  z-index: 0;
+}
+
+.et-root h1, .et-root h2, .et-root h3, .et-logo {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.et-grad-text {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- logo ---------- */
+.et-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+}
+.et-logo__mark {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: var(--grad);
+  box-shadow: 0 0 16px rgba(255,194,76,0.45);
+  flex-shrink: 0;
+}
+
+/* ---------- buttons ---------- */
+.et-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 13px 24px;
+  font-size: 14.5px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+  font-family: inherit;
+}
+.et-btn--sm { padding: 9px 18px; font-size: 13.5px; }
+.et-btn--primary {
+  background: var(--primary);
+  color: #fff;
+}
+.et-btn--primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,82,255,0.3); }
+.et-btn--ghost {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+}
+.et-btn--ghost:hover { border-color: rgba(11,15,25,0.3); background: rgba(11,15,25,0.04); }
+.et-btn--dark {
+  background: #fff;
+  color: var(--primary);
+}
+.et-btn--dark:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+.et-btn--outline {
+  background: transparent;
+  color: #fff;
+  border-color: rgba(255,255,255,0.55);
+}
+.et-btn--outline:hover { background: rgba(255,255,255,0.15); }
