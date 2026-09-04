@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <style>
 :root{
   --paper:#EEF1EA;
@@ -142,8 +143,8 @@ textarea{font-family:var(--mono); font-size:12.5px; min-height:64px; resize:vert
 .toggle-row label{font-size:13px; font-weight:500;}
 .switch{position:relative; width:38px; height:21px; flex:none;}
 .switch input{opacity:0; width:100%; height:100%; margin:0; position:absolute; cursor:pointer;}
-.switch .track{position:absolute; inset:0; background:var(--line-strong); border-radius:999px; transition:.15s;}
-.switch .knob{position:absolute; top:2px; left:2px; width:17px; height:17px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.3); transition:.15s;}
+.switch .track{position:absolute; inset:0; background:var(--line-strong); border-radius:999px; transition:.15s; pointer-events:none;}
+.switch .knob{position:absolute; top:2px; left:2px; width:17px; height:17px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.3); transition:.15s; pointer-events:none;}
 .switch input:checked + .track{background:var(--good);}
 .switch input:checked + .track .knob{transform:translateX(17px);}
 
@@ -357,6 +358,10 @@ footer a{color:var(--ink-soft);}
             <option value="custom">Paste my own names</option>
           </select>
         </div>
+        <div class="field">
+          <label for="employerName">Employer / Entity name <span class="hint">optional</span></label>
+          <input type="text" id="employerName" placeholder="leave blank to skip">
+        </div>
       </div>
 
       <div class="subpanel" id="customNamesPanel" hidden>
@@ -525,6 +530,24 @@ footer a{color:var(--ink-soft);}
           <select id="memberExistingClaim"><option value="">Leave blank</option><option value="NO" selected>NO</option><option value="YES">YES</option></select>
         </div>
       </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="hasDeathCertificate">Has Death Certificate</label>
+          <select id="hasDeathCertificate"><option value="">Leave blank</option><option value="No" selected>No</option><option value="Yes">Yes</option></select>
+        </div>
+        <div class="field">
+          <label for="toHideEmail">To Hide Email</label>
+          <select id="toHideEmail"><option value="">Leave blank</option><option value="No">No</option><option value="Yes">Yes</option></select>
+        </div>
+        <div class="field">
+          <label for="isDummyMobile">Is Dummy Mobile</label>
+          <select id="isDummyMobile"><option value="">Leave blank</option><option value="No">No</option><option value="Yes">Yes</option></select>
+        </div>
+        <div class="field">
+          <label for="toHideMobile">To Hide Mobile</label>
+          <select id="toHideMobile"><option value="">Leave blank</option><option value="No">No</option><option value="Yes">Yes</option></select>
+        </div>
+      </div>
 
       <div class="toggle-row">
         <div class="switch"><input type="checkbox" id="mobileEnabled"><div class="track"><div class="knob"></div></div></div>
@@ -538,6 +561,26 @@ footer a{color:var(--ink-soft);}
         <div class="switch"><input type="checkbox" id="coverTypeEnabled"><div class="track"><div class="knob"></div></div></div>
         <label for="coverTypeEnabled">Fill Cover Type</label>
         <select id="coverTypeValue" style="max-width:160px; margin-left:8px;" aria-label="Cover type value"><option>Individual</option><option>Family Cover</option></select>
+      </div>
+      <div class="toggle-row">
+        <div class="switch"><input type="checkbox" id="premiumEnabled"><div class="track"><div class="knob"></div></div></div>
+        <label for="premiumEnabled">Fill Premium fields <span class="hint">— almost always computed by the system, not sheet-driven; only turn this on if your template actually has a Premium column</span></label>
+      </div>
+      <div class="subpanel" id="premiumPanel" hidden>
+        <div class="field-row" style="margin-bottom:0;">
+          <div class="field">
+            <label for="employeePremiumValue">Employee Premium</label>
+            <input type="number" id="employeePremiumValue" value="5000" min="0" step="100">
+          </div>
+          <div class="field">
+            <label for="employerPremiumValue">Employer Premium <span class="hint">optional</span></label>
+            <input type="number" id="employerPremiumValue" min="0" step="100" placeholder="leave blank to skip">
+          </div>
+          <div class="field" id="opdPremiumField" hidden>
+            <label for="opdEmployeePremiumValue">OPD Employee Premium</label>
+            <input type="number" id="opdEmployeePremiumValue" min="0" step="100" placeholder="leave blank to skip">
+          </div>
+        </div>
       </div>
 
       <div class="field-row" style="margin-top:6px;">
@@ -573,7 +616,7 @@ footer a{color:var(--ink-soft);}
       <div class="note warn" id="volumeWarning" hidden></div>
 
       <div class="progresswrap" id="progressWrap" hidden>
-        <div class="progress-stats"><span id="progressLabel">Generating…</span><span id="progressPct">0%</span></div>
+        <div class="progress-stats"><span id="progressLabel">Generating…</span><span style="display:flex; align-items:center; gap:10px;"><span id="progressPct">0%</span><button class="btn small" id="cancelBtn" type="button">Stop</button></span></div>
         <div class="progressbar"><div id="progressFill"></div></div>
       </div>
 
@@ -588,7 +631,8 @@ footer a{color:var(--ink-soft);}
           <button class="btn primary" id="downloadBtn" type="button">Download file</button>
           <span id="downloadFileName" class="note" style="margin:0; align-self:center; border:none; background:none; padding:0;"></span>
         </div>
-        <h3 style="font-size:14px; margin-bottom:8px;">Preview <span class="hint" style="font-weight:400; font-size:11.5px;" id="previewHint"></span></h3>
+        <h3 style="font-size:14px; margin-bottom:8px; display:flex; align-items:center; gap:10px;">Preview <span class="hint" style="font-weight:400; font-size:11.5px;" id="previewHint"></span><button class="btn small" id="previewEditBtn" type="button" style="margin-left:auto;">✏️ Edit</button></h3>
+        <div class="note" id="editingNote" hidden>Editing preview rows — click a cell to change it. Your edits are folded into the downloaded file; anything you don't touch keeps its original value (and original Excel date formatting).</div>
         <div class="tablewrap"><table class="previewtbl" id="previewTable"></table></div>
       </div>
     </section>
@@ -600,7 +644,1267 @@ footer a{color:var(--ink-soft);}
 </footer>
 
 <script>
-window.CDN_XLSX_LOAD_ERROR = (typeof XLSX === 'undefined');
+/* ---- Data generation engine ---- */
+/* ============================================================
+   Endorsement Add-Sheet Test Data Engine
+   Pure logic, no DOM — testable under Node, then inlined into
+   the standalone HTML tool.
+   ============================================================ */
+
+// ---------- Name / reference pools (defaults; overridable in UI) ----------
+const DEFAULT_FIRST_NAMES_MALE = [
+  "Aarav","Vivaan","Aditya","Vihaan","Arjun","Sai","Reyansh","Krishna","Ishaan","Rohan",
+  "Karan","Nikhil","Rahul","Amit","Sandeep","Vikram","Ankit","Deepak","Manoj","Suresh",
+  "Rajesh","Anil","Sunil","Ashok","Prakash","Nitesh","Jidnesh","Rakesh","Vijay","Manish"
+];
+const DEFAULT_FIRST_NAMES_FEMALE = [
+  "Priya","Ananya","Diya","Saanvi","Aadhya","Ishita","Kavya","Riya","Neha","Pooja",
+  "Sneha","Anjali","Divya","Meera","Shreya","Nisha","Swati","Kavita","Rekha","Sunita",
+  "Aisha","Zoya","Manasvi","Radhika","Bhavna","Preeti","Simran","Tanvi","Vidya","Komal"
+];
+// Flat pool kept for contexts where gender-matched picking doesn't apply
+// (e.g. a user pastes their own unlabeled name list).
+const DEFAULT_FIRST_NAMES = DEFAULT_FIRST_NAMES_MALE.concat(DEFAULT_FIRST_NAMES_FEMALE);
+
+const DEFAULT_LAST_NAMES = [
+  "Sharma","Verma","Gupta","Iyer","Nair","Menon","Reddy","Rao","Naidu","Pillai",
+  "Khan","Ahmed","Sheikh","Patel","Shah","Mehta","Desai","Joshi","Kulkarni","Deshmukh",
+  "Chavan","Pawar","Jadhav","More","Bhosale","Singh","Kaur","Chauhan","Rathore","Yadav",
+  "Mishra","Tiwari","Pandey","Dubey","Trivedi","Bose","Banerjee","Chatterjee","Mukherjee","Sen",
+  "Das","Roy","Ghosh","Kapoor","Malhotra","Chopra","Bhatia","Arora","Sethi","Anand"
+];
+
+const DEFAULT_STATES = [
+  "Maharashtra","Karnataka","Tamil Nadu","Delhi","Gujarat","Rajasthan","Uttar Pradesh",
+  "West Bengal","Telangana","Andhra Pradesh","Kerala","Madhya Pradesh","Haryana","Punjab",
+  "Bihar","Odisha","Assam","Chandigarh","Goa","Jharkhand"
+];
+
+const DEFAULT_GRADES = ["Grade A","Grade B","Grade C","Grade D","Grade E"];
+const DEFAULT_DESIGNATIONS = ["Executive","Senior Executive","Assistant Manager","Manager","Senior Manager","AVP","VP"];
+const DEFAULT_SALARY_MULTIPLES = ["1","2","3"];
+
+// ---------- Canonical field alias map ----------
+// Keys are canonical field ids used internally; values are normalized
+// (lowercase, alnum-only) header variants that should map to that field.
+// Built from the real sample sheets + DefaultEndrosementFormatFeildsMapping
+// labels referenced throughout the endorsement controllers/jobs.
+const FIELD_ALIASES = {
+  employer_name: ["entity","employername","employer","entityname","companyname"],
+  employee_code: ["employeecode","empcode","employeeid","empid","employeenumber","code"],
+  employee_first_name: ["employeefirstname","empfirstname","firstname","employeename"],
+  employee_last_name: ["employeelastname","emplastname","lastname"],
+  employee_gender: ["employeegender","empgender","gender"],
+  employee_dob: ["employeedob","empdob","dateofbirth","dob"],
+  employee_doj: ["employeedateofjoining","dateofjoining","doj","joiningdate"],
+  employee_designation: ["employeedesignation","designation"],
+  employee_grade: ["employeegrade","grade"],
+  employee_unit: ["employeeunit","unit"],
+  employee_email: ["employeeemail","empemail","email","emailid","employeeemailid"],
+  employee_alt_email: ["employeealternateemail","alternateemail"],
+  is_dummy_email: ["isdummyemail"],
+  to_hide_email: ["tohideemail"],
+  is_demo_email: ["isdemoemail"],
+  demo_email_expiry: ["demoemailexpirydate","demoemaildate"],
+  is_dummy_mobile: ["isdummymobile","isdummymobileno"],
+  to_hide_mobile: ["tohidemobile","tohidemobileno"],
+  employee_mobile: ["employeemobilenumber","mobilenumber","empmobile","mobileno","contactnumber"],
+  employee_alt_mobile: ["employeealternatemobilenumber","alternatemobilenumber"],
+  mobile_no_code: ["mobilenocode"],
+  relationship: ["relationshipwithemployee","relation","relationship"],
+  insured_member_first_name: ["insuredmemberfirstname","memberfirstname","dependentfirstname"],
+  insured_member_last_name: ["insuredmemberlastname","memberlastname","dependentlastname"],
+  insured_member_gender: ["insuredmembergender","membergender","dependentgender"],
+  insured_member_dob: ["insuredmemberdob","memberdob","dependentdob"],
+  insured_member_email: ["insuredmemberemail","memberemail"],
+  insured_member_mobile: ["insuredmembermobilenumber","membermobilenumber"],
+  date_of_marriage: ["dateofmarriage","marriagedate","dom"],
+  effective_date: ["effectivedate"],
+  member_existing_claim: ["memberexistingclaim","existingclaim"],
+  has_death_certificate: ["hasdeathcertificate","deathcertificate"],
+  inception_endorsement_date: ["inceptionendorsementdate","endorsementdate"],
+  batch_id: ["batchid","batch"],
+  insurer_endorsement_id: ["insurerendorsementid"],
+  insurer_endorsement_date: ["insurerendorsementdate"],
+  should_verify_email: ["shouldverifyemail"],
+  default_password: ["defaultpassword","password"],
+  is_password_reset: ["ispasswordreset"],
+  is_vip: ["isvipemployee","isvip","vip"],
+  employee_city: ["employeecity","city"],
+  employee_state: ["employeestate","state"],
+  employee_pincode: ["employeepincode","pincode","pincodeno"],
+  employee_address: ["employeeaddress","address"],
+  insured_member_city: ["insuredmembercity","membercity"],
+  insured_member_state: ["insuredmemberstate","memberstate"],
+  insured_member_address: ["insuredmemberaddress","memberaddress"],
+  insured_member_pincode: ["insuredmemberpincode","memberpincode"],
+  suminsured: ["suminsured","suminsuredamount"],
+  opd_suminsured: ["opdsuminsured","opdsuminsuredamount"],
+  employee_premium: ["employeepremium","ipdemployeepremium","premium"],
+  employer_premium: ["employerpremium","ipdemployerpremium"],
+  opd_employee_premium: ["opdemployeepremium","opdpremium"],
+  opd_employer_premium: ["opdemployerpremium"],
+  employee_annual_salary: ["employeeannualsalary","annualsalary","salary"],
+  employee_annual_salary_2: ["employeeannualsalary2"],
+  employee_annual_salary_3: ["employeeannualsalary3"],
+  employee_variables_salary: ["employeevariablesinsalary"],
+  employee_number_of_time_salary: ["employeenumberoftimesalary","numberoftimesalary"],
+  insured_member_number_of_time_salary: ["insuredmembernumberoftimesalary"],
+  employee_no_of_time_suminsured: ["employeenooftimesuminsured","employeenumberoftimesuminsured"],
+  cover_type: ["covertype"],
+  copayment: ["copayment"],
+  copayment_percentage: ["copaymentpercentage"],
+  zone: ["zone"],
+  flex_plan: ["flexplan"],
+  self_si_selection: ["selfsiselection"],
+  installment: ["installment"],
+  location: ["location"],
+  department: ["department"],
+  salutation: ["salutation"],
+  occupation: ["occupation"],
+  nominee_name: ["nomineename"],
+  nominee_dob: ["nomineedob"],
+  relationship_with_insured: ["relationshipwithinsured"],
+  relation_of_appointee: ["relationofappointeewithnominee"],
+  appointee_name: ["appointeename"],
+  nominee_contribution: ["nomineecontribution"],
+  nominee_email: ["nomineeemail"],
+  nominee_mobile: ["nomineemobilenumber"],
+  vpn: ["vpn","vpnid"],
+  serial_number: ["serialnumber"],
+  aadhar_number: ["aadharnumber"],
+  organization: ["organization"],
+  circle: ["circle"],
+  salary_package: ["salarypackage"]
+};
+
+function normalizeHeader(label) {
+  return String(label == null ? "" : label).toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+// Build a reverse lookup once: normalized alias -> canonical field id
+function buildAliasLookup() {
+  const lookup = new Map();
+  for (const canonical in FIELD_ALIASES) {
+    for (const alias of FIELD_ALIASES[canonical]) {
+      lookup.set(alias, canonical);
+    }
+  }
+  return lookup;
+}
+const ALIAS_LOOKUP = buildAliasLookup();
+
+function resolveColumn(label) {
+  const norm = normalizeHeader(label);
+  if (!norm) return null;
+  if (ALIAS_LOOKUP.has(norm)) return ALIAS_LOOKUP.get(norm);
+  return null;
+}
+
+// headers: array of raw header strings from row 1 of the template
+// returns: array (parallel to headers) of { raw, canonical, recognized }
+function buildColumnPlan(headers) {
+  return headers.map((h) => {
+    const canonical = resolveColumn(h);
+    return { raw: h, canonical, recognized: !!canonical };
+  });
+}
+
+// ---------- RNG helpers ----------
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+function pick(arr) {
+  return arr[randInt(0, arr.length - 1)];
+}
+function chance(pct) {
+  return Math.random() * 100 < pct;
+}
+
+// ---------- Date helpers (UTC to dodge timezone drift) ----------
+function makeUTCDate(y, m, d) {
+  return new Date(Date.UTC(y, m, d));
+}
+function addYears(date, years) {
+  const d = new Date(date.getTime());
+  d.setUTCFullYear(d.getUTCFullYear() + years);
+  return d;
+}
+function addDays(date, days) {
+  const d = new Date(date.getTime());
+  d.setUTCDate(d.getUTCDate() + days);
+  return d;
+}
+function randomDateBetween(start, end) {
+  // Every caller in this app wants a plain calendar date (DOB, DOJ, DOM) -
+  // truncate to whole-day UTC midnight so no spurious time-of-day leaks
+  // into the generated Excel date cells.
+  const s = start.getTime();
+  const e = end.getTime();
+  const t = new Date(s + Math.random() * (e - s));
+  return makeUTCDate(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate());
+}
+function dobForAge(minAge, maxAge, asOf) {
+  const age = randInt(minAge, maxAge);
+  const latest = addYears(asOf, -age);
+  const earliest = addDays(addYears(latest, -1), 1);
+  return randomDateBetween(earliest, latest);
+}
+function ageOn(dob, asOf) {
+  let age = asOf.getUTCFullYear() - dob.getUTCFullYear();
+  const m = asOf.getUTCMonth() - dob.getUTCMonth();
+  if (m < 0 || (m === 0 && asOf.getUTCDate() < dob.getUTCDate())) age--;
+  return age;
+}
+
+// ---------- Sequence / code encoding (uniqueness backbone) ----------
+// A monotonically increasing counter (persisted outside this module)
+// guarantees uniqueness deterministically - no probabilistic collisions.
+function padStart(str, len, ch) {
+  str = String(str);
+  while (str.length < len) str = ch + str;
+  return str;
+}
+function toBase(num, digits) {
+  num = Math.floor(num);
+  if (num === 0) return "0";
+  let out = "";
+  while (num > 0) {
+    out = digits[num % digits.length] + out;
+    num = Math.floor(num / digits.length);
+  }
+  return out;
+}
+const ALPHA_DIGITS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const ALNUM_DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+function encodeSequence(counter, format, length, prefix) {
+  let core;
+  switch (format) {
+    case "numeric":
+      core = padStart(counter, length, "0");
+      break;
+    case "alpha":
+      core = padStart(toBase(counter, ALPHA_DIGITS), length, "A");
+      break;
+    case "alphanumeric":
+      core = padStart(toBase(counter, ALNUM_DIGITS), length, "0");
+      break;
+    default:
+      core = padStart(counter, length, "0");
+  }
+  // NEVER truncate: cutting a positional encoding down to a fixed width
+  // is only safe below N^length distinct values - past that it wraps and
+  // collides. Length is therefore a *minimum* (padding) width; it grows
+  // automatically for volumes that would otherwise overflow it.
+  return (prefix || "") + core;
+}
+
+// ---------- Relation catalogue (must match RelationMaster names exactly) ----------
+const RELATIONS = {
+  SELF: "Self",
+  SPOUSE: "Spouse",
+  SON: "Son",
+  DAUGHTER: "Daughter",
+  FATHER: "Father",
+  MOTHER: "Mother",
+  FATHER_IN_LAW: "Father-in-law",
+  MOTHER_IN_LAW: "Mother-in-law"
+};
+
+// ============================================================
+// Row generation
+// ============================================================
+
+function buildEmail(code, firstName, lastName, domain, pattern) {
+  domain = (domain || "testcompany.com").replace(/^@+/, "");
+  if (pattern === "name") {
+    const slug = (firstName + "." + lastName).toLowerCase().replace(/[^a-z.]/g, "");
+    return `${slug}${code}`.toLowerCase() + "@" + domain;
+  }
+  return `${code}`.toLowerCase() + "@" + domain;
+}
+
+function yesNo(flag) {
+  return flag ? "Yes" : "No";
+}
+
+// Produces the canonical-keyed value map for the *employee* (Self) row.
+function buildSelfValues(ctx) {
+  const { cfg, code, firstName, lastName, gender, dob, doj, asOf } = ctx;
+  const v = {
+    employer_name: cfg.employerName || "",
+    employee_code: code,
+    employee_first_name: firstName,
+    employee_last_name: lastName,
+    employee_gender: gender,
+    employee_dob: dob,
+    employee_doj: doj,
+    employee_email: buildEmail(code, firstName, lastName, cfg.emailDomain, cfg.emailPattern),
+    relationship: RELATIONS.SELF,
+    insured_member_first_name: firstName,
+    insured_member_last_name: lastName,
+    insured_member_gender: gender,
+    insured_member_dob: dob
+  };
+
+  if (cfg.mobileEnabled) {
+    v.employee_mobile = String(randInt(6, 9)) + padStart(randInt(0, 999999999), 9, "0").slice(0, 9);
+  }
+  if (cfg.defaultPasswordEnabled) {
+    v.default_password = (cfg.passwordPrefix || "Test@") + code;
+    v.is_password_reset = "No";
+  }
+  if (cfg.shouldVerifyEmail) v.should_verify_email = cfg.shouldVerifyEmail;
+  if (cfg.isDummyEmail) v.is_dummy_email = cfg.isDummyEmail;
+  if (cfg.toHideEmail) v.to_hide_email = cfg.toHideEmail;
+  if (cfg.isDummyMobile && cfg.mobileEnabled) v.is_dummy_mobile = cfg.isDummyMobile;
+  if (cfg.toHideMobile && cfg.mobileEnabled) v.to_hide_mobile = cfg.toHideMobile;
+  if (cfg.isVip) v.is_vip = cfg.isVip;
+
+  // Rater-driven fields - only populated when the chosen rule needs them,
+  // mirroring the mandatory-field logic in the validation/rater code.
+  if (cfg.raterType === "flat" || cfg.raterType === "no_rule") {
+    v.suminsured = cfg.suminsuredValue;
+    if (cfg.opdEnabled) v.opd_suminsured = cfg.opdSuminsuredValue;
+  } else if (cfg.raterType === "grade") {
+    v.employee_grade = pick(cfg.grades);
+  } else if (cfg.raterType === "designation") {
+    v.employee_designation = pick(cfg.designations);
+  } else if (cfg.raterType === "salary_multiple") {
+    v.employee_annual_salary = randInt(cfg.salaryMin, cfg.salaryMax);
+    v.employee_number_of_time_salary = pick(cfg.salaryMultiples);
+  } else if (cfg.raterType === "state") {
+    v.employee_state = pick(cfg.states);
+  }
+  // age / family_construct / none: nothing extra required beyond DOB and
+  // family structure, both already handled elsewhere.
+
+  if (cfg.premiumEnabled) {
+    v.employee_premium = cfg.employeePremiumValue;
+    if (cfg.employerPremiumValue !== "" && cfg.employerPremiumValue != null) v.employer_premium = cfg.employerPremiumValue;
+    if (cfg.opdEnabled && cfg.opdEmployeePremiumValue !== "" && cfg.opdEmployeePremiumValue != null) v.opd_employee_premium = cfg.opdEmployeePremiumValue;
+  }
+
+  if (cfg.coverType) v.cover_type = cfg.coverType;
+  if (cfg.memberExistingClaim) v.member_existing_claim = cfg.memberExistingClaim;
+  if (cfg.hasDeathCertificate) v.has_death_certificate = cfg.hasDeathCertificate;
+  if (cfg.batchId) {
+    v.batch_id = cfg.batchId;
+    v.insurer_endorsement_id = cfg.batchId;
+  }
+  if (cfg.effectiveDate) {
+    v.effective_date = cfg.effectiveDate;
+    v.inception_endorsement_date = cfg.effectiveDate;
+    v.insurer_endorsement_date = cfg.effectiveDate;
+  }
+
+  return v;
+}
+
+// Produces the canonical-keyed value map for one dependent row.
+function buildDependentValues(ctx) {
+  const { cfg, code, relation, firstName, lastName, gender, dob } = ctx;
+  const v = {
+    employer_name: cfg.employerName || "",
+    employee_code: code,
+    relationship: relation,
+    insured_member_first_name: firstName,
+    insured_member_last_name: lastName,
+    insured_member_gender: gender,
+    insured_member_dob: dob
+  };
+
+  if (cfg.raterType === "flat" || cfg.raterType === "no_rule") {
+    v.suminsured = cfg.suminsuredValue;
+    if (cfg.opdEnabled) v.opd_suminsured = cfg.opdSuminsuredValue;
+  } else if (cfg.raterType === "salary_multiple") {
+    v.insured_member_number_of_time_salary = pick(cfg.salaryMultiples);
+  }
+
+  if (cfg.premiumEnabled) {
+    v.employee_premium = cfg.employeePremiumValue;
+    if (cfg.employerPremiumValue !== "" && cfg.employerPremiumValue != null) v.employer_premium = cfg.employerPremiumValue;
+    if (cfg.opdEnabled && cfg.opdEmployeePremiumValue !== "" && cfg.opdEmployeePremiumValue != null) v.opd_employee_premium = cfg.opdEmployeePremiumValue;
+  }
+
+  if (cfg.coverType) v.cover_type = cfg.coverType;
+  if (cfg.memberExistingClaim) v.member_existing_claim = cfg.memberExistingClaim;
+  if (cfg.hasDeathCertificate) v.has_death_certificate = cfg.hasDeathCertificate;
+  if (cfg.batchId) {
+    v.batch_id = cfg.batchId;
+    v.insurer_endorsement_id = cfg.batchId;
+  }
+  if (cfg.effectiveDate) {
+    v.effective_date = cfg.effectiveDate;
+    v.inception_endorsement_date = cfg.effectiveDate;
+    v.insurer_endorsement_date = cfg.effectiveDate;
+  }
+  return v;
+}
+
+function pickGender(mode) {
+  if (mode === "male") return "Male";
+  if (mode === "female") return "Female";
+  return chance(50) ? "Male" : "Female";
+}
+
+// Picks a first name matching the given gender when the caller is using the
+// built-in gender-labelled pools; falls back to a flat random pick when the
+// user has supplied their own unlabeled custom name list (names don't need
+// to be semantically perfect there - any string is fine test data).
+function pickFirstName(cfg, gender) {
+  if (cfg.namesAreCustom || !cfg.firstNamesMale || !cfg.firstNamesFemale) {
+    return pick(cfg.firstNames);
+  }
+  return gender === "Male" ? pick(cfg.firstNamesMale) : pick(cfg.firstNamesFemale);
+}
+
+// Builds one full family (Self + optional dependents) for a single counter
+// value. Returns an array of canonical value-maps (one per person).
+function buildFamily(counter, cfg, asOf) {
+  const code = encodeSequence(counter, cfg.codeFormat, cfg.codeLength, cfg.codePrefix);
+  const gender = pickGender(cfg.genderMode);
+  const firstName = pickFirstName(cfg, gender);
+  const lastName = pick(cfg.lastNames);
+  const dob = dobForAge(cfg.dobMinAge, cfg.dobMaxAge, asOf);
+  let doj = randomDateBetween(addYears(asOf, -cfg.dojMaxYearsAgo), addDays(asOf, -cfg.dojMinDaysAgo));
+  if (doj.getTime() === dob.getTime()) doj = addDays(doj, 1); // DOB must differ from DOJ
+
+  const rows = [];
+  const selfCtx = { cfg, code, firstName, lastName, gender, dob, doj, asOf };
+  const selfValues = buildSelfValues(selfCtx);
+  rows.push(selfValues);
+
+  if (cfg.includeFamily) {
+    // Spouse
+    if (chance(cfg.spouseChancePct)) {
+      const spouseGender = gender === "Male" ? "Female" : "Male";
+      const spouseAge = Math.max(18, ageOn(dob, asOf) + randInt(-4, 4));
+      const spouseDob = dobForAge(Math.max(18, spouseAge - 1), spouseAge + 1, asOf);
+      const spFirst = pickFirstName(cfg, spouseGender);
+      const values = buildDependentValues({
+        cfg, code, relation: RELATIONS.SPOUSE, firstName: spFirst,
+        lastName, gender: spouseGender, dob: spouseDob
+      });
+      if (cfg.includeDateOfMarriage) {
+        const dom = randomDateBetween(addYears(asOf, -10), addDays(asOf, -1));
+        values.date_of_marriage = dom;
+        selfValues.date_of_marriage = dom;
+      }
+      rows.push(values);
+    }
+
+    // Children
+    const childCount = chance(cfg.childChancePct) ? randInt(cfg.childMin, cfg.childMax) : 0;
+    for (let c = 0; c < childCount; c++) {
+      const childRelation = chance(50) ? RELATIONS.SON : RELATIONS.DAUGHTER;
+      const childGender = childRelation === RELATIONS.SON ? "Male" : "Female";
+      const employeeAge = ageOn(dob, asOf);
+      const maxChildAge = Math.min(25, Math.max(0, employeeAge - 18));
+      const childDob = dobForAge(0, Math.max(0, maxChildAge), asOf);
+      const values = buildDependentValues({
+        cfg, code, relation: childRelation, firstName: pickFirstName(cfg, childGender),
+        lastName, gender: childGender, dob: childDob
+      });
+      rows.push(values);
+    }
+
+    // Parents / parents-in-law (never both, matches has_parent_cross_selection=0 default)
+    let mode = cfg.parentsMode;
+    if (mode === "random") {
+      const roll = Math.random();
+      mode = roll < 0.34 ? "parents" : roll < 0.68 ? "parents_in_law" : "none";
+    }
+    if (mode === "parents" || mode === "parents_in_law") {
+      const employeeAge = ageOn(dob, asOf);
+      const isInLaw = mode === "parents_in_law";
+      const fatherRelation = isInLaw ? RELATIONS.FATHER_IN_LAW : RELATIONS.FATHER;
+      const motherRelation = isInLaw ? RELATIONS.MOTHER_IN_LAW : RELATIONS.MOTHER;
+      const parentAge = Math.min(90, employeeAge + randInt(22, 35));
+      const fatherDob = dobForAge(Math.max(45, parentAge - 3), Math.min(95, parentAge + 3), asOf);
+      const motherDob = dobForAge(Math.max(45, parentAge - 5), Math.min(95, parentAge + 1), asOf);
+      const parentLastName = isInLaw ? pick(cfg.lastNames) : lastName;
+      rows.push(buildDependentValues({
+        cfg, code, relation: fatherRelation, firstName: pickFirstName(cfg, "Male"),
+        lastName: parentLastName, gender: "Male", dob: fatherDob
+      }));
+      rows.push(buildDependentValues({
+        cfg, code, relation: motherRelation, firstName: pickFirstName(cfg, "Female"),
+        lastName: parentLastName, gender: "Female", dob: motherDob
+      }));
+    }
+  }
+
+  return rows;
+}
+
+// Maps a canonical value-map to the raw row array using the columnPlan.
+function projectRow(valueMap, columnPlan) {
+  return columnPlan.map((col) => {
+    if (!col.canonical) return "";
+    const val = valueMap[col.canonical];
+    return val === undefined || val === null ? "" : val;
+  });
+}
+
+function generateDataset(headers, cfg, opts) {
+  opts = opts || {};
+  const asOf = cfg.asOf || new Date();
+  const columnPlan = buildColumnPlan(headers);
+  const outRows = [];
+  const usedCodes = new Set(); // defensive check only; counter already guarantees this
+  const usedEmails = new Set();
+  let counter = cfg.startCounter;
+  let employeesBuilt = 0;
+
+  for (let i = 0; i < cfg.employeeCount; i++) {
+    const family = buildFamily(counter, cfg, asOf);
+    counter++;
+    employeesBuilt++;
+    // Uniqueness applies once per employee (the Self row, always index 0 of
+    // the family) - dependents intentionally repeat the same employee_code.
+    const selfPerson = family[0];
+    if (selfPerson.employee_code) {
+      if (usedCodes.has(selfPerson.employee_code)) throw new Error("Duplicate code generated: " + selfPerson.employee_code);
+      usedCodes.add(selfPerson.employee_code);
+    }
+    if (selfPerson.employee_email) {
+      if (usedEmails.has(selfPerson.employee_email)) throw new Error("Duplicate email generated: " + selfPerson.employee_email);
+      usedEmails.add(selfPerson.employee_email);
+    }
+    for (const person of family) {
+      outRows.push(projectRow(person, columnPlan));
+    }
+    if (opts.onProgress && (i % (opts.progressEvery || 1000) === 0)) {
+      opts.onProgress(i + 1, cfg.employeeCount, outRows.length);
+    }
+  }
+
+  return {
+    columnPlan,
+    rows: outRows,
+    nextCounter: counter,
+    employeesBuilt,
+    totalRows: outRows.length
+  };
+}
+
+// Browser-friendly variant: builds the same dataset as generateDataset but
+// yields to the event loop every CHUNK employees so the tab stays responsive
+// (and the progress bar / cancel button actually work) at very large volumes.
+// Uniqueness guarantee is identical - it's the same counter-driven encoder.
+async function generateDatasetAsync(headers, cfg, onProgress, shouldCancel) {
+  const asOf = cfg.asOf || new Date();
+  const columnPlan = buildColumnPlan(headers);
+  const outRows = [];
+  let counter = cfg.startCounter;
+  let employeesBuilt = 0;
+  const CHUNK = 1500;
+  let cancelled = false;
+
+  for (let i = 0; i < cfg.employeeCount; i++) {
+    const family = buildFamily(counter, cfg, asOf);
+    counter++;
+    employeesBuilt++;
+    for (const person of family) outRows.push(projectRow(person, columnPlan));
+
+    if ((i + 1) % CHUNK === 0 || i === cfg.employeeCount - 1) {
+      if (onProgress) onProgress(i + 1, cfg.employeeCount, outRows.length);
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      if (shouldCancel && shouldCancel()) { cancelled = true; break; }
+    }
+  }
+
+  return {
+    columnPlan,
+    rows: outRows,
+    nextCounter: counter,
+    employeesBuilt,
+    totalRows: outRows.length,
+    cancelled
+  };
+}
+
+// ---------- Formatting helpers shared by preview / CSV export ----------
+function pad2(n) { return n < 10 ? "0" + n : "" + n; }
+function formatDateDDMMYYYY(d) {
+  if (!(d instanceof Date) || isNaN(d.getTime())) return "";
+  return pad2(d.getUTCDate()) + "-" + pad2(d.getUTCMonth() + 1) + "-" + d.getUTCFullYear();
+}
+function displayValue(v) {
+  if (v instanceof Date) return formatDateDDMMYYYY(v);
+  if (v === null || v === undefined) return "";
+  return String(v);
+}
+// RFC4180-ish CSV field escaping.
+function csvEscape(v) {
+  const s = displayValue(v);
+  if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+
 </script>
+<script>
+/* ---- Built-in templates ---- */
+// ============================================================
+// Built-in template layouts (used when the person doesn't upload
+// their own sample sheet). "standard" mirrors a real production
+// export verbatim; "simple" is a lean self+family layout.
+// ============================================================
+const BUILTIN_TEMPLATES = {
+  standard: [
+    "Entity","Employee Code","Employee First Name","Employee Gender","Employee DOB",
+    "Employee Date of Joining","Date of Marriage","Employee Designation","Employee Grade","Suminsured",
+    "Employee Email","Is Dummy Email","To Hide Email","Is Dummy Mobile","Employee Mobile Number","To Hide Mobile",
+    "Relationship with Employee","Insured Member First Name","Insured Member Last Name","Insured Member Gender",
+    "Insured Member DOB","Effective Date","Member Existing Claim","Has Death Certificate","Inception/Endorsement Date",
+    "Batch Id","Insurer Endorsement Id","Insurer Endorsement Date","Should Verify Email","Default Password",
+    "Is VIP Employee","Employee City","Employee State","Location","Department"
+  ],
+  simple: [
+    "Employee Code","Employee First Name","Employee Last Name","Employee Gender","Employee DOB",
+    "Employee Date of Joining","Employee Email","Employee Mobile Number","Relationship with Employee",
+    "Insured Member First Name","Insured Member Last Name","Insured Member Gender","Insured Member DOB",
+    "Suminsured","OPD Suminsured","Should Verify Email","Default Password","Batch Id"
+  ]
+};
+
+</script>
+<script>
+/* ---- App wiring ---- */
+// ============================================================
+// App wiring — DOM interactivity on top of the pure engine
+// functions defined above (buildColumnPlan, generateDatasetAsync,
+// encodeSequence, csvEscape, etc.) and BUILTIN_TEMPLATES.
+// ============================================================
+(function () {
+  "use strict";
+
+  const LS_COUNTER = "aesg_counter_v1";
+  const LS_SETTINGS = "aesg_settings_v1";
+
+  const state = {
+    headers: [],
+    columnPlan: [],
+    lastResult: null,
+    cancelRequested: false,
+    generating: false,
+    previewEditing: false
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const on = (el, ev, fn) => { if (el) el.addEventListener(ev, fn); };
+
+  // ---------- Human-readable hints for the column-detection panel ----------
+  const FILL_HINTS = {
+    employer_name: "employer name", employee_code: "unique code", employee_first_name: "first name",
+    employee_last_name: "last name", employee_gender: "gender", employee_dob: "date of birth",
+    employee_doj: "joining date", employee_designation: "designation", employee_grade: "grade",
+    employee_unit: "unit", employee_email: "unique email", employee_alt_email: "blank",
+    is_dummy_email: "blank/Yes/No", to_hide_email: "blank/Yes/No", is_demo_email: "blank",
+    demo_email_expiry: "blank", is_dummy_mobile: "blank/Yes/No", to_hide_mobile: "blank/Yes/No",
+    employee_mobile: "10-digit mobile", employee_alt_mobile: "blank", mobile_no_code: "blank",
+    relationship: "Self / Spouse / Son ...", insured_member_first_name: "member first name",
+    insured_member_last_name: "member last name", insured_member_gender: "member gender",
+    insured_member_dob: "member DOB", insured_member_email: "blank", insured_member_mobile: "blank",
+    date_of_marriage: "blank unless enabled", effective_date: "blank unless set",
+    member_existing_claim: "blank/NO/YES", has_death_certificate: "blank/Yes/No",
+    inception_endorsement_date: "blank unless set", batch_id: "blank unless set",
+    insurer_endorsement_id: "blank unless set", insurer_endorsement_date: "blank unless set",
+    should_verify_email: "blank/Yes/No", default_password: "blank unless enabled",
+    is_password_reset: "blank", is_vip: "blank/Yes/No", employee_city: "blank",
+    employee_state: "state (if rater = state)", employee_pincode: "blank", employee_address: "blank",
+    insured_member_city: "blank", insured_member_state: "blank", insured_member_address: "blank",
+    insured_member_pincode: "blank", suminsured: "sum insured (rater-dependent)", opd_suminsured: "blank unless enabled",
+    employee_annual_salary: "salary (if rater = salary multiple)", employee_annual_salary_2: "blank",
+    employee_annual_salary_3: "blank", employee_variables_salary: "blank",
+    employee_number_of_time_salary: "multiple (if rater)", insured_member_number_of_time_salary: "blank",
+    employee_no_of_time_suminsured: "blank", cover_type: "blank unless enabled", copayment: "blank",
+    copayment_percentage: "blank", zone: "blank", flex_plan: "blank", self_si_selection: "blank",
+    installment: "blank", location: "blank", department: "blank", salutation: "blank",
+    occupation: "blank", nominee_name: "blank", nominee_dob: "blank", relationship_with_insured: "blank",
+    relation_of_appointee: "blank", appointee_name: "blank", nominee_contribution: "blank",
+    nominee_email: "blank", nominee_mobile: "blank", vpn: "blank", serial_number: "blank",
+    aadhar_number: "blank", organization: "blank", circle: "blank", salary_package: "blank",
+    employee_premium: "blank unless enabled", employer_premium: "blank unless enabled",
+    opd_employee_premium: "blank unless enabled", opd_employer_premium: "blank"
+  };
+
+  // ---------- localStorage ----------
+  function loadCounter() {
+    const v = parseInt(localStorage.getItem(LS_COUNTER), 10);
+    return Number.isFinite(v) && v > 0 ? v : 1;
+  }
+  function saveCounter(n) {
+    try { localStorage.setItem(LS_COUNTER, String(n)); } catch (e) { /* storage unavailable, ignore */ }
+  }
+  function saveSettings(obj) {
+    try { localStorage.setItem(LS_SETTINGS, JSON.stringify(obj)); } catch (e) { /* ignore */ }
+  }
+  function loadSettings() {
+    try {
+      const raw = localStorage.getItem(LS_SETTINGS);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+
+  function updateNextCodeBadge() {
+    const n = parseInt($("startCounter").value, 10) || loadCounter();
+    const format = $("codeFormat").value;
+    const length = parseInt($("codeLength").value, 10) || 6;
+    const prefix = $("codePrefix").value || "";
+    const preview = encodeSequence(n, format, length, prefix);
+    $("topNextCode").textContent = preview;
+  }
+
+  // ---------- Column detection panel ----------
+  function renderColumnDetect(headers) {
+    const wrap = $("columnDetectWrap");
+    const grid = $("columnDetect");
+    grid.innerHTML = "";
+    const plan = buildColumnPlan(headers);
+    state.headers = headers;
+    state.columnPlan = plan;
+    let recCount = 0;
+    plan.forEach((col) => {
+      if (col.recognized) recCount++;
+      const div = document.createElement("div");
+      div.className = "coltag " + (col.recognized ? "rec" : "unrec");
+      const name = document.createElement("div");
+      name.className = "name";
+      name.textContent = col.raw || "(blank header)";
+      const fill = document.createElement("div");
+      fill.className = "fill";
+      fill.textContent = col.recognized ? ("→ " + (FILL_HINTS[col.canonical] || "recognized")) : "→ left blank";
+      div.appendChild(name);
+      div.appendChild(fill);
+      grid.appendChild(div);
+    });
+    $("colRecognizedCount").textContent = recCount + " of " + plan.length + " columns recognized";
+    wrap.style.display = "";
+    // Any previous result is now stale.
+    $("resultsWrap").hidden = true;
+    $("downloadBtn").disabled = true;
+  }
+
+  // ---------- Template mode (upload vs builtin) ----------
+  function setTemplateMode(mode) {
+    $("chipUpload").classList.toggle("active", mode === "upload");
+    $("chipBuiltin").classList.toggle("active", mode === "builtin");
+    $("uploadPanel").style.display = mode === "upload" ? "" : "none";
+    $("builtinPanel").style.display = mode === "builtin" ? "" : "none";
+    if (mode === "builtin") loadBuiltinTemplate();
+  }
+  function loadBuiltinTemplate() {
+    const key = $("builtinTemplate").value;
+    const headers = (BUILTIN_TEMPLATES[key] || BUILTIN_TEMPLATES.standard).slice();
+    renderColumnDetect(headers);
+  }
+
+  function showUploadStatus(msg, isError) {
+    const el = $("uploadStatus");
+    el.style.display = "";
+    el.textContent = msg;
+    el.classList.toggle("warn", !!isError);
+  }
+
+  function handleUploadedFile(file) {
+    if (!file) return;
+    showUploadStatus("Reading " + file.name + " …", false);
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, { type: "array" });
+        const firstSheetName = wb.SheetNames[0];
+        const ws = wb.Sheets[firstSheetName];
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", blankrows: false });
+        if (!rows.length || !rows[0].length) {
+          showUploadStatus("That file doesn't seem to have a header row in its first sheet.", true);
+          return;
+        }
+        const headers = rows[0].map((h) => String(h == null ? "" : h).trim()).filter((h, idx, arr) => true);
+        // Trim trailing fully-blank columns.
+        while (headers.length && headers[headers.length - 1] === "") headers.pop();
+        if (!headers.length) {
+          showUploadStatus("Couldn't find any column headers in the first row.", true);
+          return;
+        }
+        renderColumnDetect(headers);
+        showUploadStatus("Loaded " + headers.length + " columns from \u201c" + file.name + "\u201d (sheet: " + firstSheetName + ").", false);
+      } catch (err) {
+        showUploadStatus("Couldn't read that file: " + err.message, true);
+      }
+    };
+    reader.onerror = function () {
+      showUploadStatus("Couldn't read that file.", true);
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  // ---------- Rater / family / names / toggle panel switching ----------
+  const RATER_PANELS = ["raterPanel-flat", "raterPanel-grade", "raterPanel-designation", "raterPanel-salary_multiple", "raterPanel-state"];
+  const RATER_NOTES = ["raterNote-age", "raterNote-family_construct"];
+  function updateRaterPanels() {
+    const type = $("raterType").value;
+    RATER_PANELS.concat(RATER_NOTES).forEach((id) => { const el = $(id); if (el) el.hidden = true; });
+    if (type === "flat" || type === "no_rule") $("raterPanel-flat").hidden = false;
+    else if (type === "grade") $("raterPanel-grade").hidden = false;
+    else if (type === "designation") $("raterPanel-designation").hidden = false;
+    else if (type === "salary_multiple") $("raterPanel-salary_multiple").hidden = false;
+    else if (type === "state") $("raterPanel-state").hidden = false;
+    else if (type === "age") $("raterNote-age").hidden = false;
+    else if (type === "family_construct") $("raterNote-family_construct").hidden = false;
+  }
+
+  function updateOpdVisibility() {
+    $("opdValueField").hidden = !$("opdEnabled").checked;
+    $("opdPremiumField").hidden = !($("opdEnabled").checked && $("premiumEnabled").checked);
+  }
+  function updateFamilyVisibility() {
+    $("familyPanel").hidden = !$("includeFamily").checked;
+  }
+  function updateNamesVisibility() {
+    $("customNamesPanel").hidden = $("namesMode").value !== "custom";
+  }
+  function updatePremiumVisibility() {
+    $("premiumPanel").hidden = !$("premiumEnabled").checked;
+    updateOpdVisibility();
+  }
+  function updateCoverTypeVisibility() {
+    $("coverTypeValue").disabled = !$("coverTypeEnabled").checked;
+    $("coverTypeValue").style.opacity = $("coverTypeEnabled").checked ? "1" : ".5";
+  }
+
+  // ---------- Config gathering ----------
+  function parseList(str, fallback) {
+    if (!str) return fallback.slice();
+    const parts = str.split(/[,\n]/).map((s) => s.trim()).filter(Boolean);
+    return parts.length ? parts : fallback.slice();
+  }
+  function numOr(id, def) {
+    const v = parseFloat($(id).value);
+    return Number.isFinite(v) ? v : def;
+  }
+  function intOr(id, def) {
+    const v = parseInt($(id).value, 10);
+    return Number.isFinite(v) ? v : def;
+  }
+  function selectOrNull(id) {
+    const v = $(id).value;
+    return v === "" ? null : v;
+  }
+
+  function gatherConfig() {
+    const namesCustom = $("namesMode").value === "custom";
+    const customFirst = parseList($("customFirstNames").value, []);
+    const customLast = parseList($("customLastNames").value, []);
+    const useCustomNames = namesCustom && customFirst.length > 0 && customLast.length > 0;
+
+    let dobMin = intOr("dobMinAge", 21), dobMax = intOr("dobMaxAge", 58);
+    if (dobMin > dobMax) { const t = dobMin; dobMin = dobMax; dobMax = t; }
+
+    let childMin = intOr("childMin", 0), childMax = intOr("childMax", 0);
+    if (childMin > childMax) { const t = childMin; childMin = childMax; childMax = t; }
+
+    const effRaw = $("effectiveDate").value; // yyyy-mm-dd or ""
+    let effectiveDate = null;
+    if (effRaw) {
+      const [y, m, d] = effRaw.split("-").map(Number);
+      effectiveDate = makeUTCDate(y, m - 1, d);
+    }
+
+    const cfg = {
+      employeeCount: Math.max(1, intOr("numEmployees", 25)),
+      startCounter: Math.max(1, intOr("startCounter", loadCounter())),
+      codeFormat: $("codeFormat").value,
+      codeLength: Math.max(1, intOr("codeLength", 6)),
+      codePrefix: $("codePrefix").value || "",
+      emailDomain: $("emailDomain").value || "testcompany.com",
+      emailPattern: $("emailPattern").value,
+      employerName: $("employerName").value || "",
+      genderMode: $("genderMode").value,
+      namesAreCustom: useCustomNames,
+      firstNames: useCustomNames ? customFirst : DEFAULT_FIRST_NAMES,
+      firstNamesMale: useCustomNames ? null : DEFAULT_FIRST_NAMES_MALE,
+      firstNamesFemale: useCustomNames ? null : DEFAULT_FIRST_NAMES_FEMALE,
+      lastNames: useCustomNames ? customLast : DEFAULT_LAST_NAMES,
+      dobMinAge: dobMin, dobMaxAge: dobMax,
+      dojMinDaysAgo: 30, dojMaxYearsAgo: Math.max(0, numOr("dojMaxYearsAgo", 6)),
+
+      raterType: $("raterType").value,
+      suminsuredValue: numOr("suminsuredValue", 500000),
+      opdEnabled: $("opdEnabled").checked,
+      opdSuminsuredValue: numOr("opdSuminsuredValue", 50000),
+      grades: parseList($("gradesList").value, DEFAULT_GRADES),
+      designations: parseList($("designationsList").value, DEFAULT_DESIGNATIONS),
+      salaryMin: numOr("salaryMin", 400000),
+      salaryMax: numOr("salaryMax", 2000000),
+      salaryMultiples: parseList($("salaryMultiplesList").value, DEFAULT_SALARY_MULTIPLES),
+      states: parseList($("statesList").value, DEFAULT_STATES),
+
+      coverType: $("coverTypeEnabled").checked ? $("coverTypeValue").value : null,
+
+      premiumEnabled: $("premiumEnabled").checked,
+      employeePremiumValue: numOr("employeePremiumValue", 5000),
+      employerPremiumValue: $("employerPremiumValue").value === "" ? null : numOr("employerPremiumValue", null),
+      opdEmployeePremiumValue: $("opdEmployeePremiumValue").value === "" ? null : numOr("opdEmployeePremiumValue", null),
+
+      includeFamily: $("includeFamily").checked,
+      spouseChancePct: numOr("spouseChancePct", 55),
+      childChancePct: numOr("childChancePct", 45),
+      childMin: childMin, childMax: Math.max(childMin, childMax),
+      parentsMode: $("parentsMode").value,
+      includeDateOfMarriage: $("includeDOM").checked,
+
+      mobileEnabled: $("mobileEnabled").checked,
+      defaultPasswordEnabled: $("passwordEnabled").checked,
+      passwordPrefix: "Test@",
+
+      shouldVerifyEmail: selectOrNull("shouldVerifyEmail"),
+      isDummyEmail: selectOrNull("isDummyEmail"),
+      isVip: selectOrNull("isVip"),
+      memberExistingClaim: selectOrNull("memberExistingClaim"),
+      hasDeathCertificate: selectOrNull("hasDeathCertificate"),
+      toHideEmail: selectOrNull("toHideEmail"),
+      isDummyMobile: selectOrNull("isDummyMobile"),
+      toHideMobile: selectOrNull("toHideMobile"),
+
+      batchId: $("batchId").value || "",
+      effectiveDate: effectiveDate,
+
+      asOf: new Date()
+    };
+    return cfg;
+  }
+
+  // ---------- Preview / stats rendering ----------
+  function renderPreview(headers, rows) {
+    const table = $("previewTable");
+    table.innerHTML = "";
+    const thead = document.createElement("thead");
+    const trh = document.createElement("tr");
+    headers.forEach((h) => { const th = document.createElement("th"); th.textContent = h || "(blank)"; trh.appendChild(th); });
+    thead.appendChild(trh);
+    table.appendChild(thead);
+    const tbody = document.createElement("tbody");
+    const n = Math.min(50, rows.length);
+    for (let i = 0; i < n; i++) {
+      const tr = document.createElement("tr");
+      rows[i].forEach((cell, colIdx) => {
+        const td = document.createElement("td");
+        const text = displayValue(cell);
+        if (state.previewEditing) {
+          const input = document.createElement("input");
+          input.type = "text";
+          input.value = text;
+          input.dataset.row = String(i);
+          input.dataset.col = String(colIdx);
+          input.dataset.original = text;
+          input.style.cssText = "width:100%; min-width:80px; border:1px solid transparent; background:transparent; font:inherit; color:inherit; padding:2px 3px; border-radius:3px;";
+          input.addEventListener("focus", () => { input.style.borderColor = "var(--accent)"; input.style.background = "var(--surface)"; });
+          input.addEventListener("blur", () => { input.style.borderColor = "transparent"; input.style.background = "transparent"; });
+          td.appendChild(input);
+        } else {
+          td.textContent = text;
+        }
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+    $("previewHint").textContent = "— showing first " + n + " of " + rows.length + " rows" + (state.previewEditing ? " (editable)" : "");
+  }
+
+  // Folds any edited preview cells back into state.lastResult.rows. Cells
+  // left untouched keep their original value/type (e.g. real Date objects
+  // stay Date objects, so they still export as proper Excel dates).
+  function syncPreviewEdits() {
+    if (!state.lastResult) return;
+    const inputs = document.querySelectorAll("#previewTable input[data-row]");
+    inputs.forEach((input) => {
+      if (input.value === input.dataset.original) return; // untouched
+      const r = parseInt(input.dataset.row, 10);
+      const c = parseInt(input.dataset.col, 10);
+      if (state.lastResult.rows[r]) state.lastResult.rows[r][c] = input.value;
+    });
+  }
+
+  function togglePreviewEdit() {
+    if (!state.lastResult) return;
+    if (state.previewEditing) {
+      syncPreviewEdits();
+      state.previewEditing = false;
+      $("previewEditBtn").textContent = "✏️ Edit";
+      $("editingNote").hidden = true;
+    } else {
+      state.previewEditing = true;
+      $("previewEditBtn").textContent = "✓ Done editing";
+      $("editingNote").hidden = false;
+    }
+    renderPreview(state.headers, state.lastResult.rows);
+  }
+
+  function renderStats(result) {
+    $("statEmployees").textContent = result.employeesBuilt.toLocaleString();
+    $("statRows").textContent = result.totalRows.toLocaleString();
+    $("statColumns").textContent = String(state.headers.length);
+    $("statNextCounter").textContent = encodeSequence(result.nextCounter, $("codeFormat").value, intOr("codeLength", 6), $("codePrefix").value || "");
+  }
+
+  // ---------- Generate ----------
+  function setProgress(done, total, rows) {
+    const pct = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
+    $("progressFill").style.width = pct + "%";
+    $("progressPct").textContent = pct + "%";
+    $("progressLabel").textContent = "Generating… " + done.toLocaleString() + " / " + total.toLocaleString() + " employees (" + rows.toLocaleString() + " rows so far)";
+  }
+
+  async function handleGenerate() {
+    if (state.generating) return;
+    if (!state.headers.length) {
+      alert("Load a template first — upload your sheet or pick a built-in layout in Section 1.");
+      return;
+    }
+    const cfg = gatherConfig();
+
+    // Rough volume heads-up (non-blocking).
+    const estPerEmployee = cfg.includeFamily ? 2.3 : 1;
+    const estRows = Math.round(cfg.employeeCount * estPerEmployee);
+    const warnEl = $("volumeWarning");
+    if (estRows > 60000 && $("outputFormat").value === "xlsx") {
+      warnEl.hidden = false;
+      warnEl.textContent = "That's roughly " + estRows.toLocaleString() + " rows — Excel can get slow to build/open at this scale in-browser. CSV (Section 6 output format) handles large volumes more comfortably and every upload endpoint that accepts .xlsx here also accepts .csv.";
+    } else {
+      warnEl.hidden = true;
+    }
+
+    state.generating = true;
+    state.cancelRequested = false;
+    state.previewEditing = false;
+    $("generateBtn").disabled = true;
+    $("generateBtn").textContent = "Generating…";
+    $("progressWrap").hidden = false;
+    $("resultsWrap").hidden = true;
+    setProgress(0, cfg.employeeCount, 0);
+
+    try {
+      const result = await generateDatasetAsync(
+        state.headers, cfg,
+        (done, total, rows) => setProgress(done, total, rows),
+        () => state.cancelRequested
+      );
+      state.lastResult = result;
+      saveCounter(result.nextCounter);
+      $("startCounter").value = result.nextCounter;
+      updateNextCodeBadge();
+
+      renderStats(result);
+      $("previewEditBtn").textContent = "✏️ Edit";
+      $("editingNote").hidden = true;
+      renderPreview(state.headers, result.rows);
+      $("resultsWrap").hidden = false;
+      $("downloadBtn").disabled = false;
+      $("downloadFileName").textContent = result.cancelled ? "Stopped early — " + result.totalRows.toLocaleString() + " rows are ready to download." : "Ready.";
+
+      saveSettings(collectPersistableSettings());
+    } catch (err) {
+      alert("Generation failed: " + err.message);
+      console.error(err);
+    } finally {
+      state.generating = false;
+      $("generateBtn").disabled = false;
+      $("generateBtn").textContent = "Generate dataset";
+      $("progressWrap").hidden = true;
+    }
+  }
+
+  // ---------- Download ----------
+  function timestamp() {
+    const d = new Date();
+    const p = (n) => String(n).padStart(2, "0");
+    return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "-" + p(d.getHours()) + p(d.getMinutes());
+  }
+
+  function handleDownload() {
+    if (!state.lastResult) return;
+    syncPreviewEdits();
+    const format = $("outputFormat").value;
+    const base = "endorsement-add-" + state.lastResult.employeesBuilt + "emp-" + timestamp();
+    if (format === "csv") {
+      const lines = [state.headers.map(csvEscape).join(",")];
+      for (const row of state.lastResult.rows) lines.push(row.map(csvEscape).join(","));
+      const blob = new Blob([lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+      triggerDownload(blob, base + ".csv");
+    } else {
+      const aoa = [state.headers].concat(state.lastResult.rows);
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Add");
+      XLSX.writeFile(wb, base + ".xlsx");
+    }
+  }
+  function triggerDownload(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
+
+  // ---------- Settings persistence (best-effort convenience) ----------
+  const PERSIST_FIELD_IDS = [
+    "numEmployees","genderMode","dobMinAge","dobMaxAge","dojMaxYearsAgo","codeFormat","codeLength","codePrefix",
+    "emailDomain","emailPattern","employerName","raterType","suminsuredValue","opdEnabled","opdSuminsuredValue",
+    "gradesList","designationsList","salaryMin","salaryMax","salaryMultiplesList","statesList","coverTypeEnabled",
+    "coverTypeValue","premiumEnabled","employeePremiumValue","employerPremiumValue","opdEmployeePremiumValue",
+    "includeFamily","spouseChancePct","childChancePct","childMin","childMax","parentsMode","includeDOM",
+    "mobileEnabled","passwordEnabled","shouldVerifyEmail","isDummyEmail","isVip","memberExistingClaim",
+    "hasDeathCertificate","toHideEmail","isDummyMobile","toHideMobile","batchId","outputFormat"
+  ];
+  function collectPersistableSettings() {
+    const out = {};
+    PERSIST_FIELD_IDS.forEach((id) => {
+      const el = $(id);
+      if (!el) return;
+      out[id] = el.type === "checkbox" ? el.checked : el.value;
+    });
+    return out;
+  }
+  function applyPersistedSettings(saved) {
+    if (!saved) return;
+    PERSIST_FIELD_IDS.forEach((id) => {
+      const el = $(id);
+      if (!el || !(id in saved)) return;
+      if (el.type === "checkbox") el.checked = !!saved[id];
+      else el.value = saved[id];
+    });
+  }
+
+  // ---------- Wiring ----------
+  function wire() {
+    // Template mode
+    document.querySelectorAll('input[name="tmplMode"]').forEach((r) => {
+      on(r, "change", () => setTemplateMode(r.value));
+    });
+    on($("builtinTemplate"), "change", loadBuiltinTemplate);
+
+    // File upload
+    on($("filedrop"), "click", () => $("tmplFile").click());
+    on($("tmplFile"), "change", (e) => handleUploadedFile(e.target.files[0]));
+    ["dragenter", "dragover"].forEach((ev) => on($("filedrop"), ev, (e) => { e.preventDefault(); $("filedrop").classList.add("drag"); }));
+    ["dragleave", "drop"].forEach((ev) => on($("filedrop"), ev, (e) => { e.preventDefault(); $("filedrop").classList.remove("drag"); }));
+    on($("filedrop"), "drop", (e) => { const f = e.dataTransfer.files && e.dataTransfer.files[0]; if (f) handleUploadedFile(f); });
+
+    // Rater / family / names / toggles
+    on($("raterType"), "change", updateRaterPanels);
+    on($("opdEnabled"), "change", updateOpdVisibility);
+    on($("includeFamily"), "change", updateFamilyVisibility);
+    on($("namesMode"), "change", updateNamesVisibility);
+    on($("premiumEnabled"), "change", updatePremiumVisibility);
+    on($("coverTypeEnabled"), "change", updateCoverTypeVisibility);
+
+    // Code preview badge
+    ["startCounter", "codeFormat", "codeLength", "codePrefix"].forEach((id) => on($(id), "input", updateNextCodeBadge));
+    on($("resetCounterBtn"), "click", () => {
+      if (!confirm("Reset uniqueness memory back to 1? Codes already generated in past downloads could then repeat.")) return;
+      saveCounter(1);
+      $("startCounter").value = 1;
+      updateNextCodeBadge();
+    });
+
+    // Generate / download
+    on($("generateBtn"), "click", handleGenerate);
+    on($("downloadBtn"), "click", handleDownload);
+    on($("previewEditBtn"), "click", togglePreviewEdit);
+    on($("cancelBtn"), "click", () => { state.cancelRequested = true; });
+
+    // Initial state
+    setTemplateMode("upload");
+    updateRaterPanels();
+    updateOpdVisibility();
+    updateFamilyVisibility();
+    updateNamesVisibility();
+    updatePremiumVisibility();
+    updateCoverTypeVisibility();
+
+    const savedSettings = loadSettings();
+    if (savedSettings) applyPersistedSettings(savedSettings);
+    $("startCounter").value = loadCounter();
+    updateNextCodeBadge();
+    updateRaterPanels();
+    updateOpdVisibility();
+    updateFamilyVisibility();
+    updateNamesVisibility();
+    updatePremiumVisibility();
+    updateCoverTypeVisibility();
+
+    // Default effective date = today, if the field was left empty by a fresh visitor.
+    if (!$("effectiveDate").value) {
+      const d = new Date();
+      const p = (n) => String(n).padStart(2, "0");
+      $("effectiveDate").value = d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", wire);
+  } else {
+    wire();
+  }
+})();
+
+</script>
+<script>
+/* ---- GSAP polish (progressive enhancement) ---- */
+// ============================================================
+// Progressive-enhancement animation (auto.html / GitHub Pages
+// variant only). Purely cosmetic - every one of these blocks is
+// guarded so the tool works identically if GSAP fails to load.
+// ============================================================
+(function () {
+  "use strict";
+  function ready(fn) {
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn);
+    else fn();
+  }
+  ready(function () {
+    if (typeof gsap === "undefined") return;
+
+    try {
+      gsap.set(".lede, .card", { opacity: 0, y: 12 });
+      gsap.to(".lede", { opacity: 1, y: 0, duration: .5, ease: "power2.out" });
+      gsap.to(".card", { opacity: 1, y: 0, duration: .5, ease: "power2.out", stagger: .07, delay: .08 });
+    } catch (e) { /* purely cosmetic - never block the tool */ }
+
+    // Odometer-style "tick" whenever the next-code preview badge changes.
+    var badge = document.getElementById("topNextCode");
+    if (badge && window.MutationObserver) {
+      var lastText = badge.textContent;
+      var obs = new MutationObserver(function () {
+        if (badge.textContent === lastText) return;
+        lastText = badge.textContent;
+        try {
+          gsap.fromTo(badge, { y: -6, opacity: 0 }, { y: 0, opacity: 1, duration: .32, ease: "back.out(2.2)" });
+        } catch (e) { /* ignore */ }
+      });
+      obs.observe(badge, { childList: true, characterData: true, subtree: true });
+    }
+
+    // Gentle shimmer on the progress fill while a generation run is active.
+    var fill = document.getElementById("progressFill");
+    if (fill) {
+      fill.style.backgroundImage = "linear-gradient(90deg, var(--accent) 0%, #e0a552 50%, var(--accent) 100%)";
+      fill.style.backgroundSize = "200% 100%";
+      gsap.to(fill, { backgroundPosition: "-200% 0", duration: 1.4, repeat: -1, ease: "linear" });
+    }
+  });
+})();
+
+</script>
+
 </body>
 </html>
