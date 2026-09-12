@@ -290,7 +290,7 @@ footer a{color:var(--ink-soft);}
       <div class="field-row">
         <div class="field">
           <label for="numEmployees">Employees to generate</label>
-          <input type="number" id="numEmployees" value="25" min="1" step="1">
+          <input type="number" id="numEmployees" value="100" min="1" step="1">
         </div>
         <div class="field">
           <label for="genderMode">Gender mix</label>
@@ -310,6 +310,27 @@ footer a{color:var(--ink-soft);}
         <div class="field">
           <label for="dojMaxYearsAgo">Joined within last (years)</label>
           <input type="number" id="dojMaxYearsAgo" value="6" min="0" max="40">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="dobFixedValue">Same DOB for everyone <span class="hint">on by default — matches "DOB is a constant" in the field spec; uncheck for a random per-employee age range</span></label>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <div class="switch"><input type="checkbox" id="dobFixedEnabled" checked><div class="track"><div class="knob"></div></div></div>
+            <input type="date" id="dobFixedValue" value="1995-06-15" aria-label="Fixed date of birth for everyone">
+          </div>
+        </div>
+        <div class="field">
+          <label for="dojFixedValue">Same DOJ for everyone <span class="hint">on by default, pre-filled recent — some policies reject a DOJ older than a configured number of days, so this defaults to ~30 days ago rather than a fixed date that goes stale</span></label>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <div class="switch"><input type="checkbox" id="dojFixedEnabled" checked><div class="track"><div class="knob"></div></div></div>
+            <input type="date" id="dojFixedValue" aria-label="Fixed date of joining for everyone">
+          </div>
+        </div>
+        <div class="field" style="grid-column:span 2;">
+          <label>&nbsp;</label>
+          <p class="sub" style="margin:0;">Date of Joining must land at least 18 years after Date of Birth for every employee — if you fix both and that gap is short, generation will stop and tell you rather than silently drifting either date.</p>
         </div>
       </div>
 
@@ -342,7 +363,7 @@ footer a{color:var(--ink-soft);}
       <div class="field-row">
         <div class="field">
           <label for="emailDomain">Email domain</label>
-          <input type="text" id="emailDomain" value="testcompany.com">
+          <input type="text" id="emailDomain" value="fyntune.com">
         </div>
         <div class="field">
           <label for="emailPattern">Email pattern</label>
@@ -510,7 +531,7 @@ footer a{color:var(--ink-soft);}
     <!-- ============ SECTION 5: OPTIONAL FIELDS ============ -->
     <section class="card" id="s-optional">
       <div class="card-head"><span class="card-num">5</span><h3>Optional fields</h3></div>
-      <p class="sub">Everything here is nullable — leave it off and the column stays blank, exactly like the underlying validation allows.</p>
+      <p class="sub">Employee Code, First/Last Name, Gender, DOB, DOJ, Email, Mobile Number, Suminsured, Relationship, Should Verify Email and Default Password are always filled — they're confirmed mandatory. Everything below is confirmed <strong>not</strong> mandatory: leave it off and the column stays genuinely blank (nothing to fail validation on); only turn it on where you actually want the value tested.</p>
 
       <div class="field-row">
         <div class="field">
@@ -523,17 +544,17 @@ footer a{color:var(--ink-soft);}
         </div>
         <div class="field">
           <label for="isVip">Is VIP Employee</label>
-          <select id="isVip"><option value="">Leave blank</option><option value="No" selected>No</option><option value="Yes">Yes</option></select>
+          <select id="isVip"><option value="" selected>Leave blank</option><option value="No">No</option><option value="Yes">Yes</option></select>
         </div>
         <div class="field">
           <label for="memberExistingClaim">Member Existing Claim</label>
-          <select id="memberExistingClaim"><option value="">Leave blank</option><option value="NO" selected>NO</option><option value="YES">YES</option></select>
+          <select id="memberExistingClaim"><option value="" selected>Leave blank</option><option value="NO">NO</option><option value="YES">YES</option></select>
         </div>
       </div>
       <div class="field-row">
         <div class="field">
           <label for="hasDeathCertificate">Has Death Certificate</label>
-          <select id="hasDeathCertificate"><option value="">Leave blank</option><option value="No" selected>No</option><option value="Yes">Yes</option></select>
+          <select id="hasDeathCertificate"><option value="" selected>Leave blank</option><option value="No">No</option><option value="Yes">Yes</option></select>
         </div>
         <div class="field">
           <label for="toHideEmail">To Hide Email</label>
@@ -549,14 +570,8 @@ footer a{color:var(--ink-soft);}
         </div>
       </div>
 
-      <div class="toggle-row">
-        <div class="switch"><input type="checkbox" id="mobileEnabled"><div class="track"><div class="knob"></div></div></div>
-        <label for="mobileEnabled">Generate a valid 10-digit Employee Mobile Number</label>
-      </div>
-      <div class="toggle-row">
-        <div class="switch"><input type="checkbox" id="passwordEnabled"><div class="track"><div class="knob"></div></div></div>
-        <label for="passwordEnabled">Generate a Default Password (min. 8 characters)</label>
-      </div>
+      <div class="note">Employee Mobile Number (10 digits, starts 7/8/9) and Default Password are mandatory and always generated now — no toggle needed.</div>
+
       <div class="toggle-row">
         <div class="switch"><input type="checkbox" id="coverTypeEnabled"><div class="track"><div class="knob"></div></div></div>
         <label for="coverTypeEnabled">Fill Cover Type</label>
@@ -585,12 +600,41 @@ footer a{color:var(--ink-soft);}
 
       <div class="field-row" style="margin-top:6px;">
         <div class="field">
-          <label for="batchId">Batch / Insurer Endorsement ID <span class="hint">optional, applied to every row</span></label>
+          <label for="batchId">Batch / Insurer Endorsement ID <span class="hint">letters &amp; numbers only — anything else is stripped</span></label>
           <input type="text" id="batchId" placeholder="e.g. QATEST0001">
         </div>
         <div class="field">
-          <label for="effectiveDate">Effective / Endorsement date <span class="hint">optional, applied to every row</span></label>
+          <label for="effectiveDate">Inception / Endorsement date <span class="hint">optional — leave blank to skip. Fills Inception/Endorsement Date only; Effective Date is left blank since it's checked against your policy's actual start/end dates, which this tool can't see</span></label>
           <input type="date" id="effectiveDate">
+        </div>
+        <div class="field">
+          <label for="defaultPasswordValue">Default Password value <span class="hint">mandatory — same for every employee</span></label>
+          <input type="text" id="defaultPasswordValue" value="Test@12345">
+        </div>
+      </div>
+
+      <div class="toggle-row">
+        <div class="switch"><input type="checkbox" id="fillOptionalFieldsEnabled"><div class="track"><div class="knob"></div></div></div>
+        <label for="fillOptionalFieldsEnabled">Also fill non-mandatory fields <span class="hint">State, City, Pincode, Address, CTC, Location, Installment, Data Received On — best-guess values that may not match your validator's exact rules; leave off unless you specifically need them populated</span></label>
+      </div>
+      <div class="subpanel" id="optionalFieldsPanel" hidden>
+        <div class="field-row" style="margin-bottom:0;">
+          <div class="field">
+            <label>CTC range</label>
+            <div style="display:flex; gap:6px;">
+              <input type="number" id="ctcMin" value="300000" min="0" step="10000" aria-label="Minimum CTC">
+              <input type="number" id="ctcMax" value="2000000" min="0" step="10000" aria-label="Maximum CTC">
+            </div>
+          </div>
+          <div class="field">
+            <label for="installmentValue">Installment</label>
+            <select id="installmentValue">
+              <option value="1" selected>1 — Annual / single installment</option>
+              <option value="2">2 — Half-yearly</option>
+              <option value="4">4 — Quarterly</option>
+              <option value="12">12 — Monthly</option>
+            </select>
+          </div>
         </div>
       </div>
     </section>
@@ -680,6 +724,36 @@ const DEFAULT_STATES = [
   "Bihar","Odisha","Assam","Chandigarh","Goa","Jharkhand"
 ];
 
+// City pool per state, used for Employee/Insured Member City and for
+// Location (kept to plain letters + spaces only - no commas, slashes or
+// punctuation - since some validators reject special characters there).
+const STATE_CITY_MAP = {
+  "Maharashtra": ["Mumbai","Pune","Nagpur"],
+  "Karnataka": ["Bengaluru","Mysuru","Mangaluru"],
+  "Tamil Nadu": ["Chennai","Coimbatore","Madurai"],
+  "Delhi": ["New Delhi"],
+  "Gujarat": ["Ahmedabad","Surat","Vadodara"],
+  "Rajasthan": ["Jaipur","Jodhpur","Udaipur"],
+  "Uttar Pradesh": ["Lucknow","Kanpur","Noida"],
+  "West Bengal": ["Kolkata","Howrah"],
+  "Telangana": ["Hyderabad","Warangal"],
+  "Andhra Pradesh": ["Vijayawada","Visakhapatnam"],
+  "Kerala": ["Kochi","Thiruvananthapuram"],
+  "Madhya Pradesh": ["Bhopal","Indore"],
+  "Haryana": ["Gurugram","Faridabad"],
+  "Punjab": ["Ludhiana","Amritsar"],
+  "Bihar": ["Patna","Gaya"],
+  "Odisha": ["Bhubaneswar","Cuttack"],
+  "Assam": ["Guwahati"],
+  "Chandigarh": ["Chandigarh"],
+  "Goa": ["Panaji","Margao"],
+  "Jharkhand": ["Ranchi","Jamshedpur"]
+};
+function cityForState(state) {
+  const list = STATE_CITY_MAP[state];
+  return list ? pick(list) : "Head Office";
+}
+
 const DEFAULT_GRADES = ["Grade A","Grade B","Grade C","Grade D","Grade E"];
 const DEFAULT_DESIGNATIONS = ["Executive","Senior Executive","Assistant Manager","Manager","Senior Manager","AVP","VP"];
 const DEFAULT_SALARY_MULTIPLES = ["1","2","3"];
@@ -723,6 +797,8 @@ const FIELD_ALIASES = {
   member_existing_claim: ["memberexistingclaim","existingclaim"],
   has_death_certificate: ["hasdeathcertificate","deathcertificate"],
   inception_endorsement_date: ["inceptionendorsementdate","endorsementdate"],
+  ctc: ["ctc"],
+  data_received_on: ["datareceivedon","receivedon","datarecievedon"],
   batch_id: ["batchid","batch"],
   insurer_endorsement_id: ["insurerendorsementid"],
   insurer_endorsement_date: ["insurerendorsementdate"],
@@ -866,37 +942,55 @@ function padStart(str, len, ch) {
   return str;
 }
 function toBase(num, digits) {
-  num = Math.floor(num);
-  if (num === 0) return "0";
+  // BigInt-safe: a plain Number loses integer precision past 2^53, which
+  // long alphanumeric codes (length up to 20) can exceed.
+  let n = typeof num === "bigint" ? num : BigInt(Math.floor(num));
+  const base = BigInt(digits.length);
+  if (n === 0n) return digits[0];
   let out = "";
-  while (num > 0) {
-    out = digits[num % digits.length] + out;
-    num = Math.floor(num / digits.length);
+  while (n > 0n) {
+    out = digits[Number(n % base)] + out;
+    n = n / base;
   }
   return out;
 }
 const ALPHA_DIGITS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const ALNUM_DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+// Every code starts at base^(length-1) - the smallest value that already
+// occupies exactly `length` digits - the same way a real integer never
+// shows leading zeros: 100000000 has 9 significant digits, not "1" padded
+// with 8 filler zeros. Any "0" that shows up after the leading digit is
+// therefore a real digit of the number, not padding, and a run like
+// "E100004000" is exactly as meaningful as any other value in the range.
+// Past base^length the number naturally grows an extra digit - no
+// separate overflow handling needed, same as counting past 999 to 1000.
 function encodeSequence(counter, format, length, prefix) {
+  const len = Math.max(1, length);
   let core;
   switch (format) {
-    case "numeric":
-      core = padStart(counter, length, "0");
+    case "numeric": {
+      const offset = 10n ** BigInt(len - 1);
+      core = String(offset + BigInt(counter - 1));
       break;
-    case "alpha":
-      core = padStart(toBase(counter, ALPHA_DIGITS), length, "A");
+    }
+    case "alpha": {
+      const base = BigInt(ALPHA_DIGITS.length);
+      const offset = base ** BigInt(len - 1);
+      core = toBase(offset + BigInt(counter - 1), ALPHA_DIGITS);
       break;
-    case "alphanumeric":
-      core = padStart(toBase(counter, ALNUM_DIGITS), length, "0");
+    }
+    case "alphanumeric": {
+      const base = BigInt(ALNUM_DIGITS.length);
+      const offset = base ** BigInt(len - 1);
+      core = toBase(offset + BigInt(counter - 1), ALNUM_DIGITS);
       break;
-    default:
-      core = padStart(counter, length, "0");
+    }
+    default: {
+      const offset = 10n ** BigInt(len - 1);
+      core = String(offset + BigInt(counter - 1));
+    }
   }
-  // NEVER truncate: cutting a positional encoding down to a fixed width
-  // is only safe below N^length distinct values - past that it wraps and
-  // collides. Length is therefore a *minimum* (padding) width; it grows
-  // automatically for volumes that would otherwise overflow it.
   return (prefix || "") + core;
 }
 
@@ -931,7 +1025,7 @@ function yesNo(flag) {
 
 // Produces the canonical-keyed value map for the *employee* (Self) row.
 function buildSelfValues(ctx) {
-  const { cfg, code, firstName, lastName, gender, dob, doj, asOf } = ctx;
+  const { cfg, code, firstName, lastName, gender, dob, doj, asOf, state, city, pincode, address, ctc } = ctx;
   const v = {
     employer_name: cfg.employerName || "",
     employee_code: code,
@@ -942,24 +1036,44 @@ function buildSelfValues(ctx) {
     employee_doj: doj,
     employee_email: buildEmail(code, firstName, lastName, cfg.emailDomain, cfg.emailPattern),
     relationship: RELATIONS.SELF,
-    insured_member_first_name: firstName,
-    insured_member_last_name: lastName,
-    insured_member_gender: gender,
-    insured_member_dob: dob
+    // Insured Member fields are deliberately left OUT here. The employee
+    // is never their own insured member on the Self row - only dependent
+    // rows (buildDependentValues) populate Insured Member columns. Setting
+    // them to the employee's own name/DOB here is exactly what makes a
+    // validator reject the row as "employee cannot be their own dependent".
+    //
+    // Mandatory fields only, per the confirmed field list: Code, First/Last
+    // Name, Gender, DOB, DOJ, Email, Mobile, Suminsured, Relationship,
+    // Should Verify Email, Default Password. Mobile Number and Default
+    // Password used to be toggle-gated (off by default) - that was the
+    // "passwords all blank" bug. They're unconditional now.
+    employee_mobile: String(randInt(7, 9)) + padStart(randInt(0, 999999999), 9, "0").slice(0, 9),
+    mobile_no_code: "91", // paired with Mobile Number - a blank code next to a filled number is what triggered "country code is invalid"
+    default_password: cfg.defaultPasswordValue || "Test@12345",
+    is_password_reset: "No"
   };
-
-  if (cfg.mobileEnabled) {
-    v.employee_mobile = String(randInt(6, 9)) + padStart(randInt(0, 999999999), 9, "0").slice(0, 9);
-  }
-  if (cfg.defaultPasswordEnabled) {
-    v.default_password = (cfg.passwordPrefix || "Test@") + code;
-    v.is_password_reset = "No";
-  }
   if (cfg.shouldVerifyEmail) v.should_verify_email = cfg.shouldVerifyEmail;
+
+  // Everything below is confirmed NOT mandatory. It only gets filled when
+  // "Also fill non-mandatory fields" is switched on - guessed values here
+  // (State names, Installment codes, CTC ranges, Location text rules) are
+  // exactly what produced the last batch of validator errors, and leaving
+  // an optional field genuinely blank passes validation trivially.
+  if (cfg.fillOptionalFields) {
+    v.employee_state = state;
+    v.employee_city = city;
+    v.employee_pincode = pincode;
+    v.employee_address = address;
+    v.location = city;
+    v.ctc = ctc;
+    v.data_received_on = asOf;
+    if (cfg.installment) v.installment = cfg.installment;
+  }
+
   if (cfg.isDummyEmail) v.is_dummy_email = cfg.isDummyEmail;
   if (cfg.toHideEmail) v.to_hide_email = cfg.toHideEmail;
-  if (cfg.isDummyMobile && cfg.mobileEnabled) v.is_dummy_mobile = cfg.isDummyMobile;
-  if (cfg.toHideMobile && cfg.mobileEnabled) v.to_hide_mobile = cfg.toHideMobile;
+  if (cfg.isDummyMobile) v.is_dummy_mobile = cfg.isDummyMobile;
+  if (cfg.toHideMobile) v.to_hide_mobile = cfg.toHideMobile;
   if (cfg.isVip) v.is_vip = cfg.isVip;
 
   // Rater-driven fields - only populated when the chosen rule needs them,
@@ -974,9 +1088,9 @@ function buildSelfValues(ctx) {
   } else if (cfg.raterType === "salary_multiple") {
     v.employee_annual_salary = randInt(cfg.salaryMin, cfg.salaryMax);
     v.employee_number_of_time_salary = pick(cfg.salaryMultiples);
-  } else if (cfg.raterType === "state") {
-    v.employee_state = pick(cfg.states);
   }
+  // "state" rater: Employee State is populated above only when "Also fill
+  // non-mandatory fields" is on (paired with City) - nothing extra here.
   // age / family_construct / none: nothing extra required beyond DOB and
   // family structure, both already handled elsewhere.
 
@@ -994,7 +1108,13 @@ function buildSelfValues(ctx) {
     v.insurer_endorsement_id = cfg.batchId;
   }
   if (cfg.effectiveDate) {
-    v.effective_date = cfg.effectiveDate;
+    // Inception/Endorsement Date is just a date-format check. Effective
+    // Date is different - it's validated against the *policy's actual*
+    // start_date/end_date (a DB field on the policy, not this sheet) and
+    // against DOJ, none of which we can see from here. Deriving one from
+    // the other was comparing against the wrong date entirely, so
+    // Effective Date is left genuinely blank (skips validation) rather
+    // than guessed.
     v.inception_endorsement_date = cfg.effectiveDate;
     v.insurer_endorsement_date = cfg.effectiveDate;
   }
@@ -1004,16 +1124,27 @@ function buildSelfValues(ctx) {
 
 // Produces the canonical-keyed value map for one dependent row.
 function buildDependentValues(ctx) {
-  const { cfg, code, relation, firstName, lastName, gender, dob } = ctx;
+  const { cfg, code, relation, firstName, lastName, gender, dob, asOf, state, city, pincode, address, ctc } = ctx;
   const v = {
     employer_name: cfg.employerName || "",
     employee_code: code,
     relationship: relation,
+    // Insured Member = this dependent's own identity - never the employee's.
     insured_member_first_name: firstName,
     insured_member_last_name: lastName,
     insured_member_gender: gender,
     insured_member_dob: dob
   };
+  if (cfg.fillOptionalFields) {
+    v.insured_member_state = state;
+    v.insured_member_city = city;
+    v.insured_member_pincode = pincode;
+    v.insured_member_address = address;
+    v.location = city;
+    v.ctc = ctc;
+    v.data_received_on = asOf;
+    if (cfg.installment) v.installment = cfg.installment;
+  }
 
   if (cfg.raterType === "flat" || cfg.raterType === "no_rule") {
     v.suminsured = cfg.suminsuredValue;
@@ -1036,7 +1167,6 @@ function buildDependentValues(ctx) {
     v.insurer_endorsement_id = cfg.batchId;
   }
   if (cfg.effectiveDate) {
-    v.effective_date = cfg.effectiveDate;
     v.inception_endorsement_date = cfg.effectiveDate;
     v.insurer_endorsement_date = cfg.effectiveDate;
   }
@@ -1060,19 +1190,74 @@ function pickFirstName(cfg, gender) {
   return gender === "Male" ? pick(cfg.firstNamesMale) : pick(cfg.firstNamesFemale);
 }
 
+// ---------- Precomputed pools ----------
+// Building a fresh random DOB/DOJ via Math.random() + several Date
+// allocations for every one of up to millions of rows is the single
+// biggest per-row cost in this engine. Repeated DOB/DOJ values across
+// employees are completely fine test-data-wise (real bulk sheets often
+// share a handful of dates across a whole cohort), so we precompute a
+// pool ONCE per "Generate" click and every row just cycles through it -
+// O(poolSize) expensive work instead of O(employeeCount).
+const MIN_POOL_SIZE = 100;
+const MAX_POOL_SIZE = 5000;
+function poolSizeFor(employeeCount) {
+  return Math.min(MAX_POOL_SIZE, Math.max(MIN_POOL_SIZE, employeeCount));
+}
+function buildDobPool(minAge, maxAge, asOf, size) {
+  const pool = new Array(size);
+  for (let i = 0; i < size; i++) pool[i] = dobForAge(minAge, maxAge, asOf);
+  return pool;
+}
+function buildDojPool(maxYearsAgo, minDaysAgo, asOf, size) {
+  const start = addYears(asOf, -maxYearsAgo);
+  const end = addDays(asOf, -minDaysAgo);
+  const pool = new Array(size);
+  for (let i = 0; i < size; i++) pool[i] = randomDateBetween(start, end);
+  return pool;
+}
+// Built once per generateDataset(Async) call and threaded through every
+// buildFamily() call for that run - see buildDatePools() below.
+function buildDatePools(cfg, asOf) {
+  const size = poolSizeFor(cfg.employeeCount);
+  return {
+    dob: cfg.dobFixedDate ? null : buildDobPool(cfg.dobMinAge, cfg.dobMaxAge, asOf, size),
+    doj: cfg.dojFixedDate ? null : buildDojPool(cfg.dojMaxYearsAgo, cfg.dojMinDaysAgo, asOf, size)
+  };
+}
+
 // Builds one full family (Self + optional dependents) for a single counter
 // value. Returns an array of canonical value-maps (one per person).
-function buildFamily(counter, cfg, asOf) {
+// `poolIndex` is the 0-based position of this employee in the run, used to
+// pull DOB/DOJ from the precomputed pools instead of generating fresh.
+function buildFamily(counter, cfg, asOf, pools, poolIndex) {
   const code = encodeSequence(counter, cfg.codeFormat, cfg.codeLength, cfg.codePrefix);
   const gender = pickGender(cfg.genderMode);
   const firstName = pickFirstName(cfg, gender);
   const lastName = pick(cfg.lastNames);
-  const dob = dobForAge(cfg.dobMinAge, cfg.dobMaxAge, asOf);
-  let doj = randomDateBetween(addYears(asOf, -cfg.dojMaxYearsAgo), addDays(asOf, -cfg.dojMinDaysAgo));
-  if (doj.getTime() === dob.getTime()) doj = addDays(doj, 1); // DOB must differ from DOJ
+
+  const dob = cfg.dobFixedDate ? cfg.dobFixedDate : pools.dob[poolIndex % pools.dob.length];
+  let doj = cfg.dojFixedDate ? cfg.dojFixedDate : pools.doj[poolIndex % pools.doj.length];
+  // DOJ must land at least 18 years after DOB (a person can't join a job
+  // before turning 18) - and can never exactly equal DOB. When DOJ is a
+  // fixed, shared value this was already checked once up front in
+  // gatherConfig(), so it's left alone here rather than silently shifted.
+  if (!cfg.dojFixedDate) {
+    const minDoj = addYears(dob, 18);
+    if (doj.getTime() < minDoj.getTime()) doj = minDoj;
+  }
+  if (doj.getTime() === dob.getTime()) doj = addDays(doj, 1);
+
+  // One shared address / CTC per family - a dependent doesn't have their
+  // own city or pay, so they reuse the employee's.
+  const state = pick(cfg.states);
+  const city = cityForState(state);
+  const pincode = String(randInt(100000, 999999));
+  const address = "House " + randInt(1, 999) + ", " + city;
+  const ctc = String(randInt(cfg.ctcMin, cfg.ctcMax));
+  const addr = { state, city, pincode, address, ctc };
 
   const rows = [];
-  const selfCtx = { cfg, code, firstName, lastName, gender, dob, doj, asOf };
+  const selfCtx = Object.assign({ cfg, code, firstName, lastName, gender, dob, doj, asOf }, addr);
   const selfValues = buildSelfValues(selfCtx);
   rows.push(selfValues);
 
@@ -1083,10 +1268,10 @@ function buildFamily(counter, cfg, asOf) {
       const spouseAge = Math.max(18, ageOn(dob, asOf) + randInt(-4, 4));
       const spouseDob = dobForAge(Math.max(18, spouseAge - 1), spouseAge + 1, asOf);
       const spFirst = pickFirstName(cfg, spouseGender);
-      const values = buildDependentValues({
+      const values = buildDependentValues(Object.assign({
         cfg, code, relation: RELATIONS.SPOUSE, firstName: spFirst,
-        lastName, gender: spouseGender, dob: spouseDob
-      });
+        lastName, gender: spouseGender, dob: spouseDob, asOf
+      }, addr));
       if (cfg.includeDateOfMarriage) {
         const dom = randomDateBetween(addYears(asOf, -10), addDays(asOf, -1));
         values.date_of_marriage = dom;
@@ -1103,10 +1288,10 @@ function buildFamily(counter, cfg, asOf) {
       const employeeAge = ageOn(dob, asOf);
       const maxChildAge = Math.min(25, Math.max(0, employeeAge - 18));
       const childDob = dobForAge(0, Math.max(0, maxChildAge), asOf);
-      const values = buildDependentValues({
+      const values = buildDependentValues(Object.assign({
         cfg, code, relation: childRelation, firstName: pickFirstName(cfg, childGender),
-        lastName, gender: childGender, dob: childDob
-      });
+        lastName, gender: childGender, dob: childDob, asOf
+      }, addr));
       rows.push(values);
     }
 
@@ -1125,14 +1310,14 @@ function buildFamily(counter, cfg, asOf) {
       const fatherDob = dobForAge(Math.max(45, parentAge - 3), Math.min(95, parentAge + 3), asOf);
       const motherDob = dobForAge(Math.max(45, parentAge - 5), Math.min(95, parentAge + 1), asOf);
       const parentLastName = isInLaw ? pick(cfg.lastNames) : lastName;
-      rows.push(buildDependentValues({
+      rows.push(buildDependentValues(Object.assign({
         cfg, code, relation: fatherRelation, firstName: pickFirstName(cfg, "Male"),
-        lastName: parentLastName, gender: "Male", dob: fatherDob
-      }));
-      rows.push(buildDependentValues({
+        lastName: parentLastName, gender: "Male", dob: fatherDob, asOf
+      }, addr)));
+      rows.push(buildDependentValues(Object.assign({
         cfg, code, relation: motherRelation, firstName: pickFirstName(cfg, "Female"),
-        lastName: parentLastName, gender: "Female", dob: motherDob
-      }));
+        lastName: parentLastName, gender: "Female", dob: motherDob, asOf
+      }, addr)));
     }
   }
 
@@ -1142,9 +1327,9 @@ function buildFamily(counter, cfg, asOf) {
 // Maps a canonical value-map to the raw row array using the columnPlan.
 function projectRow(valueMap, columnPlan) {
   return columnPlan.map((col) => {
-    if (!col.canonical) return "";
+    if (!col.canonical) return null;
     const val = valueMap[col.canonical];
-    return val === undefined || val === null ? "" : val;
+    return val === undefined || val === null || val === "" ? null : val;
   });
 }
 
@@ -1152,6 +1337,7 @@ function generateDataset(headers, cfg, opts) {
   opts = opts || {};
   const asOf = cfg.asOf || new Date();
   const columnPlan = buildColumnPlan(headers);
+  const pools = buildDatePools(cfg, asOf);
   const outRows = [];
   const usedCodes = new Set(); // defensive check only; counter already guarantees this
   const usedEmails = new Set();
@@ -1159,7 +1345,7 @@ function generateDataset(headers, cfg, opts) {
   let employeesBuilt = 0;
 
   for (let i = 0; i < cfg.employeeCount; i++) {
-    const family = buildFamily(counter, cfg, asOf);
+    const family = buildFamily(counter, cfg, asOf, pools, i);
     counter++;
     employeesBuilt++;
     // Uniqueness applies once per employee (the Self row, always index 0 of
@@ -1197,6 +1383,7 @@ function generateDataset(headers, cfg, opts) {
 async function generateDatasetAsync(headers, cfg, onProgress, shouldCancel) {
   const asOf = cfg.asOf || new Date();
   const columnPlan = buildColumnPlan(headers);
+  const pools = buildDatePools(cfg, asOf);
   const outRows = [];
   let counter = cfg.startCounter;
   let employeesBuilt = 0;
@@ -1204,7 +1391,7 @@ async function generateDatasetAsync(headers, cfg, onProgress, shouldCancel) {
   let cancelled = false;
 
   for (let i = 0; i < cfg.employeeCount; i++) {
-    const family = buildFamily(counter, cfg, asOf);
+    const family = buildFamily(counter, cfg, asOf, pools, i);
     counter++;
     employeesBuilt++;
     for (const person of family) outRows.push(projectRow(person, columnPlan));
@@ -1244,6 +1431,17 @@ function csvEscape(v) {
   if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
   return s;
 }
+// XLSX cell export: Dates become plain "dd-mm-yyyy" TEXT (never a native
+// Excel date serial - that's what let a timezone offset leak a spurious
+// time-of-day into every date cell). Numbers/strings pass through
+// unchanged so numeric columns (CTC, Suminsured, ...) stay real numbers,
+// and null stays null so SheetJS leaves the cell genuinely empty instead
+// of writing an empty-string cell that some validators treat as "present
+// but invalid" rather than "blank, skip validation".
+function toXlsxCell(v) {
+  if (v instanceof Date) return formatDateDDMMYYYY(v);
+  return v;
+}
 
 
 </script>
@@ -1255,14 +1453,32 @@ function csvEscape(v) {
 // export verbatim; "simple" is a lean self+family layout.
 // ============================================================
 const BUILTIN_TEMPLATES = {
+  // Full production column set, exact order - this is your real uploaded
+  // sheet's structure verbatim (103 columns). Unfilled columns still exist
+  // as empty headers; nothing here is dropped or reordered.
   standard: [
-    "Entity","Employee Code","Employee First Name","Employee Gender","Employee DOB",
-    "Employee Date of Joining","Date of Marriage","Employee Designation","Employee Grade","Suminsured",
-    "Employee Email","Is Dummy Email","To Hide Email","Is Dummy Mobile","Employee Mobile Number","To Hide Mobile",
-    "Relationship with Employee","Insured Member First Name","Insured Member Last Name","Insured Member Gender",
-    "Insured Member DOB","Effective Date","Member Existing Claim","Has Death Certificate","Inception/Endorsement Date",
-    "Batch Id","Insurer Endorsement Id","Insurer Endorsement Date","Should Verify Email","Default Password",
-    "Is VIP Employee","Employee City","Employee State","Location","Department"
+    "Employee Code","Employee First Name","Employee Last Name","Employee Gender","Employee DOB",
+    "Employee Date of Joining","Employee Email","Employee Alternate Email","Employee Mobile Number",
+    "Mobile No Code","Employee Alternate Mobile Number","Employee Designation","Employee Grade",
+    "Employee Annual Salary","Employee Variables in Salary","Employee Number of Time Salary",
+    "Employee Address","Employee State","Employee City","Employee Pin Code","Suminsured","Employee Premium",
+    "Employer Premium","OPD Suminsured","OPD Employer Premium","OPD Employee Premium",
+    "Relationship with Employee","Date of Marriage","Employee Unit","Insured Member First Name","Salutation",
+    "Insured Member Last Name","Insured Member Gender","Insured Member DOB","Insured Member Email",
+    "Insured Member Mobile Number","Insured Member Number of Time Salary","Insured Member Address",
+    "Employee No of Time Suminsured","Insured Member City","Insured Member State","Insured Member Pin Code",
+    "Inception/Endorsement Date","Effective Date","CTC","Location","Zone","Is VIP Employee","Is Demo Email",
+    "Demo Email Expiry Date","Should Verify Email","Default Password","Is Dummy Email","To Hide Email",
+    "Is Dummy Mobile","To Hide Mobile","Is Password Reset","Employee Annual Salary 2",
+    "Employee Variables in Salary 2","Employee Annual Salary 3","Employee Variables in Salary 3","Flex Plan",
+    "Self SI Selection","Cover Type","Other 1","Other 2","Other 3","Other 4","Other 5",
+    "Member Existing Claim","Data Received On","Other 6","Insurer Endorsement Id","Other 7",
+    "Insurer Endorsement Date","Other 8","Insurer Removal Id","Other 9","Insurer Correction Id","Other 10",
+    "Insurer Correction Date","Insurer Removal Date","Installment","Has Death Certificate","Batch Id",
+    "Insurer Client Id","Tpa Member Id","Tpa Member Name","Ecard Url","Serial Number","Occupation",
+    "Aadhar Number","ABHA ID","Account Number","VPN ID","Nominee Name","Nominee DOB","Nominee Email",
+    "Nominee Mobile Number","Appointee Name","Relationship With Insured","Relation Of Appointee With Nominee",
+    "Nominee Contribution"
   ],
   simple: [
     "Employee Code","Employee First Name","Employee Last Name","Employee Gender","Employee DOB",
@@ -1306,7 +1522,7 @@ const BUILTIN_TEMPLATES = {
     employee_unit: "unit", employee_email: "unique email", employee_alt_email: "blank",
     is_dummy_email: "blank/Yes/No", to_hide_email: "blank/Yes/No", is_demo_email: "blank",
     demo_email_expiry: "blank", is_dummy_mobile: "blank/Yes/No", to_hide_mobile: "blank/Yes/No",
-    employee_mobile: "10-digit mobile", employee_alt_mobile: "blank", mobile_no_code: "blank",
+    employee_mobile: "10-digit mobile, starts 7/8/9", employee_alt_mobile: "blank", mobile_no_code: "91",
     relationship: "Self / Spouse / Son ...", insured_member_first_name: "member first name",
     insured_member_last_name: "member last name", insured_member_gender: "member gender",
     insured_member_dob: "member DOB", insured_member_email: "blank", insured_member_mobile: "blank",
@@ -1314,9 +1530,9 @@ const BUILTIN_TEMPLATES = {
     member_existing_claim: "blank/NO/YES", has_death_certificate: "blank/Yes/No",
     inception_endorsement_date: "blank unless set", batch_id: "blank unless set",
     insurer_endorsement_id: "blank unless set", insurer_endorsement_date: "blank unless set",
-    should_verify_email: "blank/Yes/No", default_password: "blank unless enabled",
+    should_verify_email: "const No", default_password: "const Test@12345",
     is_password_reset: "blank", is_vip: "blank/Yes/No", employee_city: "blank",
-    employee_state: "state (if rater = state)", employee_pincode: "blank", employee_address: "blank",
+    employee_state: "blank unless 'fill non-mandatory fields' is on", employee_pincode: "blank", employee_address: "blank",
     insured_member_city: "blank", insured_member_state: "blank", insured_member_address: "blank",
     insured_member_pincode: "blank", suminsured: "sum insured (rater-dependent)", opd_suminsured: "blank unless enabled",
     employee_annual_salary: "salary (if rater = salary multiple)", employee_annual_salary_2: "blank",
@@ -1478,6 +1694,9 @@ const BUILTIN_TEMPLATES = {
     $("coverTypeValue").disabled = !$("coverTypeEnabled").checked;
     $("coverTypeValue").style.opacity = $("coverTypeEnabled").checked ? "1" : ".5";
   }
+  function updateOptionalFieldsVisibility() {
+    $("optionalFieldsPanel").hidden = !$("fillOptionalFieldsEnabled").checked;
+  }
 
   // ---------- Config gathering ----------
   function parseList(str, fallback) {
@@ -1496,6 +1715,10 @@ const BUILTIN_TEMPLATES = {
   function selectOrNull(id) {
     const v = $(id).value;
     return v === "" ? null : v;
+  }
+  // Batch Id / Insurer Endorsement Id must be alphanumeric only.
+  function sanitizeAlnum(str) {
+    return String(str || "").replace(/[^A-Za-z0-9]/g, "");
   }
 
   function gatherConfig() {
@@ -1517,8 +1740,28 @@ const BUILTIN_TEMPLATES = {
       effectiveDate = makeUTCDate(y, m - 1, d);
     }
 
+    function parseFixedDate(enabledId, valueId) {
+      if (!$(enabledId).checked) return null;
+      const raw = $(valueId).value;
+      if (!raw) return null;
+      const [y, m, d] = raw.split("-").map(Number);
+      return makeUTCDate(y, m - 1, d);
+    }
+    const dobFixedDate = parseFixedDate("dobFixedEnabled", "dobFixedValue");
+    const dojFixedDate = parseFixedDate("dojFixedEnabled", "dojFixedValue");
+    if (dobFixedDate && dojFixedDate) {
+      const gapYears = ageOn(dobFixedDate, dojFixedDate);
+      if (gapYears < 18) {
+        throw new Error(
+          "Date of Joining must be at least 18 years after Date of Birth (currently " +
+          gapYears + " year" + (gapYears === 1 ? "" : "s") +
+          " apart). Adjust the fixed DOB/DOJ dates in Section 2."
+        );
+      }
+    }
+
     const cfg = {
-      employeeCount: Math.max(1, intOr("numEmployees", 25)),
+      employeeCount: Math.max(1, intOr("numEmployees", 100)),
       startCounter: Math.max(1, intOr("startCounter", loadCounter())),
       codeFormat: $("codeFormat").value,
       codeLength: Math.max(1, intOr("codeLength", 6)),
@@ -1534,6 +1777,7 @@ const BUILTIN_TEMPLATES = {
       lastNames: useCustomNames ? customLast : DEFAULT_LAST_NAMES,
       dobMinAge: dobMin, dobMaxAge: dobMax,
       dojMinDaysAgo: 30, dojMaxYearsAgo: Math.max(0, numOr("dojMaxYearsAgo", 6)),
+      dobFixedDate: dobFixedDate, dojFixedDate: dojFixedDate,
 
       raterType: $("raterType").value,
       suminsuredValue: numOr("suminsuredValue", 500000),
@@ -1560,9 +1804,12 @@ const BUILTIN_TEMPLATES = {
       parentsMode: $("parentsMode").value,
       includeDateOfMarriage: $("includeDOM").checked,
 
-      mobileEnabled: $("mobileEnabled").checked,
-      defaultPasswordEnabled: $("passwordEnabled").checked,
-      passwordPrefix: "Test@",
+      defaultPasswordValue: $("defaultPasswordValue").value || "Test@12345",
+      fillOptionalFields: $("fillOptionalFieldsEnabled").checked,
+
+      ctcMin: numOr("ctcMin", 300000),
+      ctcMax: numOr("ctcMax", 2000000),
+      installment: $("installmentValue").value || "1",
 
       shouldVerifyEmail: selectOrNull("shouldVerifyEmail"),
       isDummyEmail: selectOrNull("isDummyEmail"),
@@ -1573,7 +1820,7 @@ const BUILTIN_TEMPLATES = {
       isDummyMobile: selectOrNull("isDummyMobile"),
       toHideMobile: selectOrNull("toHideMobile"),
 
-      batchId: $("batchId").value || "",
+      batchId: sanitizeAlnum($("batchId").value),
       effectiveDate: effectiveDate,
 
       asOf: new Date()
@@ -1591,7 +1838,7 @@ const BUILTIN_TEMPLATES = {
     thead.appendChild(trh);
     table.appendChild(thead);
     const tbody = document.createElement("tbody");
-    const n = Math.min(50, rows.length);
+    const n = Math.min(100, rows.length);
     for (let i = 0; i < n; i++) {
       const tr = document.createElement("tr");
       rows[i].forEach((cell, colIdx) => {
@@ -1620,8 +1867,9 @@ const BUILTIN_TEMPLATES = {
   }
 
   // Folds any edited preview cells back into state.lastResult.rows. Cells
-  // left untouched keep their original value/type (e.g. real Date objects
-  // stay Date objects, so they still export as proper Excel dates).
+  // left untouched keep their original value/type (Date objects included -
+  // toXlsxCell() converts any remaining Date to dd-mm-yyyy text at export
+  // time, whether it came from here untouched or was typed by hand).
   function syncPreviewEdits() {
     if (!state.lastResult) return;
     const inputs = document.querySelectorAll("#previewTable input[data-row]");
@@ -1740,7 +1988,8 @@ const BUILTIN_TEMPLATES = {
       const blob = new Blob([lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
       triggerDownload(blob, base + ".csv");
     } else {
-      const aoa = [state.headers].concat(state.lastResult.rows);
+      const xlsxRows = state.lastResult.rows.map((row) => row.map(toXlsxCell));
+      const aoa = [state.headers].concat(xlsxRows);
       const ws = XLSX.utils.aoa_to_sheet(aoa);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Add");
@@ -1758,12 +2007,14 @@ const BUILTIN_TEMPLATES = {
   // ---------- Settings persistence (best-effort convenience) ----------
   const PERSIST_FIELD_IDS = [
     "numEmployees","genderMode","dobMinAge","dobMaxAge","dojMaxYearsAgo","codeFormat","codeLength","codePrefix",
+    "dobFixedEnabled","dobFixedValue","dojFixedEnabled","dojFixedValue",
     "emailDomain","emailPattern","employerName","raterType","suminsuredValue","opdEnabled","opdSuminsuredValue",
     "gradesList","designationsList","salaryMin","salaryMax","salaryMultiplesList","statesList","coverTypeEnabled",
     "coverTypeValue","premiumEnabled","employeePremiumValue","employerPremiumValue","opdEmployeePremiumValue",
     "includeFamily","spouseChancePct","childChancePct","childMin","childMax","parentsMode","includeDOM",
-    "mobileEnabled","passwordEnabled","shouldVerifyEmail","isDummyEmail","isVip","memberExistingClaim",
-    "hasDeathCertificate","toHideEmail","isDummyMobile","toHideMobile","batchId","outputFormat"
+    "defaultPasswordValue","fillOptionalFieldsEnabled","shouldVerifyEmail","isDummyEmail","isVip","memberExistingClaim",
+    "hasDeathCertificate","toHideEmail","isDummyMobile","toHideMobile","batchId","outputFormat",
+    "ctcMin","ctcMax","installmentValue"
   ];
   function collectPersistableSettings() {
     const out = {};
@@ -1806,6 +2057,7 @@ const BUILTIN_TEMPLATES = {
     on($("namesMode"), "change", updateNamesVisibility);
     on($("premiumEnabled"), "change", updatePremiumVisibility);
     on($("coverTypeEnabled"), "change", updateCoverTypeVisibility);
+    on($("fillOptionalFieldsEnabled"), "change", updateOptionalFieldsVisibility);
 
     // Code preview badge
     ["startCounter", "codeFormat", "codeLength", "codePrefix"].forEach((id) => on($(id), "input", updateNextCodeBadge));
@@ -1830,6 +2082,7 @@ const BUILTIN_TEMPLATES = {
     updateNamesVisibility();
     updatePremiumVisibility();
     updateCoverTypeVisibility();
+    updateOptionalFieldsVisibility();
 
     const savedSettings = loadSettings();
     if (savedSettings) applyPersistedSettings(savedSettings);
@@ -1841,12 +2094,14 @@ const BUILTIN_TEMPLATES = {
     updateNamesVisibility();
     updatePremiumVisibility();
     updateCoverTypeVisibility();
+    updateOptionalFieldsVisibility();
 
-    // Default effective date = today, if the field was left empty by a fresh visitor.
-    if (!$("effectiveDate").value) {
+
+    if (!$("dojFixedValue").value) {
       const d = new Date();
+      d.setDate(d.getDate() - 30);
       const p = (n) => String(n).padStart(2, "0");
-      $("effectiveDate").value = d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+      $("dojFixedValue").value = d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
     }
   }
 
@@ -1859,12 +2114,7 @@ const BUILTIN_TEMPLATES = {
 
 </script>
 <script>
-/* ---- GSAP polish (progressive enhancement) ---- */
-// ============================================================
-// Progressive-enhancement animation (auto.html / GitHub Pages
-// variant only). Purely cosmetic - every one of these blocks is
-// guarded so the tool works identically if GSAP fails to load.
-// ============================================================
+
 (function () {
   "use strict";
   function ready(fn) {
