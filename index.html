@@ -248,6 +248,154 @@ body.light .camera-crosshair:before, body.light .camera-crosshair:after { backgr
   .reveal,.split-word > span { opacity:1!important; transform:none!important; }
 }
 </style>
+<style>
+/* ───────────────────────────────────────────────────────────────────────────
+   Additions: sections 009-015. Same tokens and voice as the page above; nothing above is restyled.
+   ─────────────────────────────────────────────────────────────────────────── */
+.x-lede { color:var(--muted); line-height:1.75; font-size:17px; max-width:760px; margin:0 0 50px; }
+.x-chip { display:inline-block; font:500 10px/1 "DM Mono",monospace; text-transform:uppercase; letter-spacing:.1em; padding:6px 9px; border:1px solid var(--line); color:var(--muted); }
+.x-chip.live { color:var(--acid); border-color:var(--acid); background:var(--soft); }
+.x-chip.next { border-style:dashed; }
+.x-code { font:500 12px/1.6 "DM Mono",monospace; color:var(--accent2); }
+
+/* 009 — journey */
+.x-journey { display:grid; grid-template-columns:.9fr 1.4fr; gap:2px; background:var(--line); border:1px solid var(--line); }
+.x-steps { background:var(--bg); display:flex; flex-direction:column; }
+.x-step { all:unset; box-sizing:border-box; cursor:pointer; display:grid; grid-template-columns:54px 1fr auto; gap:14px; align-items:center; padding:22px 26px; border-bottom:1px solid var(--line); transition:.3s; position:relative; }
+.x-step:last-child { border-bottom:0; }
+.x-step:before { content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--acid); transform:scaleY(0); transition:.3s; }
+.x-step .n { font:500 11px "DM Mono",monospace; color:var(--muted); }
+.x-step .t { font-size:22px; font-weight:700; letter-spacing:-.04em; }
+.x-step:hover, .x-step:focus-visible { background:var(--soft); padding-left:32px; }
+.x-step[aria-selected="true"] { background:var(--soft); }
+.x-step[aria-selected="true"]:before { transform:scaleY(1); }
+.x-step[aria-selected="true"] .n { color:var(--acid); }
+.x-panel { background:var(--panel); padding:44px 44px 40px; min-height:430px; display:flex; flex-direction:column; gap:20px; }
+.x-panel h3 { font-size:clamp(28px,3.2vw,44px); letter-spacing:-.055em; line-height:1; margin:0; }
+.x-panel p { color:var(--muted); line-height:1.7; margin:0; max-width:620px; }
+.x-states { display:flex; flex-wrap:wrap; gap:8px; margin-top:auto; padding-top:10px; }
+.x-state { font:500 11px "DM Mono",monospace; padding:8px 11px; border:1px solid var(--line); color:var(--ink); background:var(--bg); }
+.x-state.stop { border-color:#ff8a5c; color:#ff8a5c; }
+.x-state.ok { border-color:var(--acid); color:var(--acid); }
+.x-flow { height:3px; background:var(--line); position:relative; overflow:hidden; }
+.x-flow i { position:absolute; inset:0 auto 0 0; width:0; background:var(--acid); box-shadow:0 0 14px var(--acid); transition:width .6s cubic-bezier(.2,.8,.2,1); }
+
+/* 010 — rules */
+.x-grid { display:grid; grid-template-columns:repeat(4,1fr); border-top:1px solid var(--line); border-left:1px solid var(--line); }
+.x-card { padding:28px 26px 30px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); position:relative; transition:.4s cubic-bezier(.2,.8,.2,1); background:linear-gradient(180deg,rgba(255,255,255,.02),transparent); }
+.x-card:hover { background:var(--soft); transform:translateY(-6px); box-shadow:0 22px 60px var(--shadow); z-index:1; }
+.x-card .k { font:500 10px "DM Mono",monospace; color:var(--acid); text-transform:uppercase; letter-spacing:.1em; }
+.x-card h3 { font-size:23px; letter-spacing:-.045em; margin:34px 0 12px; line-height:1.05; }
+.x-card p { color:var(--muted); font-size:14px; line-height:1.62; margin:0; }
+.x-card .eg { margin-top:16px; padding-top:14px; border-top:1px dashed var(--line); font:500 11px/1.6 "DM Mono",monospace; color:var(--ink); }
+
+/* 011 — simulator */
+.x-sim { display:grid; grid-template-columns:1.1fr 1fr; gap:2px; background:var(--line); border:1px solid var(--line); }
+.x-sim-form, .x-sim-out { background:var(--bg); padding:32px; }
+.x-presets { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:26px; }
+.x-presets button, .x-today { font:500 11px "DM Mono",monospace; text-transform:uppercase; letter-spacing:.06em; padding:9px 12px; border:1px solid var(--line); background:transparent; color:var(--ink); cursor:pointer; transition:.25s; }
+.x-presets button:hover, .x-today:hover, .x-presets button[aria-pressed="true"] { border-color:var(--acid); color:var(--acid); background:var(--soft); }
+.x-fields { display:grid; grid-template-columns:repeat(2,1fr); gap:14px 16px; }
+.x-fields label { display:flex; flex-direction:column; gap:6px; font:500 10px "DM Mono",monospace; text-transform:uppercase; letter-spacing:.09em; color:var(--muted); }
+.x-fields input, .x-fields select { font:500 14px Manrope,sans-serif; color:var(--ink); background:var(--panel); border:1px solid var(--line); padding:10px 11px; min-width:0; width:100%; color-scheme:dark; }
+body.light .x-fields input, body.light .x-fields select { color-scheme:light; }
+.x-fields input:focus, .x-fields select:focus { outline:1px solid var(--acid); border-color:var(--acid); }
+.x-fields .check { flex-direction:row; align-items:center; gap:10px; text-transform:none; letter-spacing:0; font:600 13px Manrope,sans-serif; color:var(--ink); }
+.x-fields .check input { width:auto; accent-color:var(--acid); }
+.x-fields .wide { grid-column:1/-1; }
+.x-group { grid-column:1/-1; border-top:1px solid var(--line); padding-top:14px; margin-top:4px; font:500 10px "DM Mono",monospace; text-transform:uppercase; letter-spacing:.12em; color:var(--acid); }
+.x-sim-out { display:flex; flex-direction:column; gap:20px; }
+.x-verdict { font-size:clamp(40px,5vw,66px); font-weight:800; letter-spacing:-.07em; line-height:.95; }
+.x-verdict.open, .x-verdict.confirmed { color:var(--acid); }
+.x-verdict.closed { color:#ff8a5c; }
+.x-verdict.cbno { color:var(--accent2); font-size:clamp(30px,3.6vw,46px); }
+.x-facts { display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+.x-facts div { background:var(--panel); padding:13px 14px; font-size:14px; font-weight:600; }
+.x-facts small { display:block; font:500 9px "DM Mono",monospace; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); margin-bottom:5px; }
+.x-trace { list-style:none; margin:0; padding:0; border-top:1px solid var(--line); }
+.x-trace li { display:grid; grid-template-columns:44px 1fr; gap:12px; padding:11px 0; border-bottom:1px solid var(--line); color:var(--muted); font-size:14px; line-height:1.5; }
+.x-trace li b { font:500 11px "DM Mono",monospace; color:var(--acid); padding-top:2px; }
+.x-note { font-size:13px; color:var(--muted); line-height:1.6; margin:0; }
+
+/* 012 — ledger */
+.x-ledger { display:grid; grid-template-columns:1fr 1.15fr; gap:70px; align-items:start; }
+.x-points { list-style:none; margin:30px 0 0; padding:0; }
+.x-points li { border-top:1px solid var(--line); padding:18px 0; display:grid; grid-template-columns:130px 1fr; gap:20px; color:var(--muted); line-height:1.6; }
+.x-points li span { font:500 11px "DM Mono",monospace; color:var(--acid); text-transform:uppercase; padding-top:3px; }
+.x-table { border:1px solid var(--line); background:var(--panel); overflow:hidden; }
+.x-table-head { display:flex; justify-content:space-between; padding:14px 20px; border-bottom:1px solid var(--line); }
+.x-row { display:grid; grid-template-columns:78px 1fr 112px 112px; gap:12px; padding:15px 20px; border-bottom:1px solid var(--line); font-size:14px; align-items:center; }
+.x-row:last-child { border-bottom:0; }
+.x-row.h { font:500 10px "DM Mono",monospace; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); background:var(--panel2); }
+.x-row .cr { color:var(--acid); font-weight:700; } .x-row .dr { color:#ff8a5c; font-weight:700; }
+.x-row .amt, .x-row .bal { text-align:right; font-variant-numeric:tabular-nums; }
+.x-row small { display:block; color:var(--muted); font:500 10px "DM Mono",monospace; margin-top:3px; }
+.x-row.low { background:var(--soft); }
+
+/* 013 — security */
+.x-secure { display:grid; grid-template-columns:1.05fr 1fr; gap:70px; align-items:center; }
+.x-door { border:1px solid var(--line); background:var(--panel); padding:34px 30px; display:grid; gap:0; }
+.x-lane { display:grid; grid-template-columns:1fr; gap:6px; }
+.x-box { border:1px solid var(--line); padding:14px 16px; font:500 11px/1.5 "DM Mono",monospace; text-transform:uppercase; letter-spacing:.07em; background:var(--bg); }
+.x-box b { display:block; font:800 16px Manrope,sans-serif; letter-spacing:-.03em; text-transform:none; margin-bottom:3px; color:var(--ink); }
+.x-box.gate { border-color:var(--acid); background:var(--soft); }
+.x-box.gate b { color:var(--acid); }
+.x-wire { height:34px; width:1px; margin:0 auto; background:repeating-linear-gradient(var(--acid) 0 5px,transparent 5px 10px); position:relative; }
+.x-wire:after { content:""; position:absolute; left:-3px; width:7px; height:7px; border-radius:50%; background:var(--acid); animation:xpulse 1.9s linear infinite; box-shadow:0 0 12px var(--acid); }
+@keyframes xpulse { from { top:-4px; opacity:0; } 15% { opacity:1; } 85% { opacity:1; } to { top:34px; opacity:0; } }
+.x-denied { display:flex; justify-content:space-between; gap:14px; margin-top:14px; padding:12px 16px; border:1px dashed #ff8a5c; color:#ff8a5c; font:500 11px "DM Mono",monospace; text-transform:uppercase; letter-spacing:.07em; }
+.x-svc { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+.x-svc .x-box { font-size:9px; text-align:center; padding:10px 6px; }
+
+/* 014 — status */
+.x-status { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--line); border:1px solid var(--line); }
+.x-col { background:var(--bg); padding:34px 30px 38px; }
+.x-col h3 { font-size:26px; letter-spacing:-.05em; margin:18px 0 6px; }
+.x-col > p { color:var(--muted); font-size:14px; line-height:1.6; margin:0 0 22px; }
+.x-col ul { list-style:none; margin:0; padding:0; }
+.x-col li { padding:11px 0 11px 22px; border-top:1px solid var(--line); position:relative; font-size:14.5px; line-height:1.5; }
+.x-col li:before { content:""; position:absolute; left:2px; top:19px; width:8px; height:8px; border:1px solid var(--acid); transform:rotate(45deg); }
+.x-col.built li:before { background:var(--acid); }
+.x-col.next li:before { border-style:dashed; border-color:var(--muted); }
+.x-col li small { display:block; color:var(--muted); font-size:12.5px; margin-top:2px; }
+.x-proof { display:flex; flex-wrap:wrap; gap:36px; margin-top:44px; align-items:end; }
+.x-proof div { font-size:clamp(36px,5vw,64px); font-weight:800; letter-spacing:-.07em; line-height:.9; }
+.x-proof small { display:block; font:500 10px "DM Mono",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:8px; }
+
+/* interactive panels swap their own text: keep it crisp rather than scroll-blurred by the page's reveal effect */
+.x-panel p, .x-panel h3, .x-sim-out p, .x-sim-out .mono { filter:none !important; }
+.x-panel h3, .x-panel p, .x-sim-out p { opacity:1 !important; transform:none !important; }
+
+/* 015 — services */
+.x-services { display:grid; grid-template-columns:repeat(5,1fr); border-top:1px solid var(--line); border-left:1px solid var(--line); }
+.x-service { padding:22px 20px 26px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); transition:.35s; }
+.x-service:hover { background:var(--soft); }
+.x-service .k { font:500 10px "DM Mono",monospace; color:var(--acid); letter-spacing:.1em; text-transform:uppercase; }
+.x-service h3 { font-size:18px; letter-spacing:-.04em; margin:22px 0 8px; }
+.x-service p { font-size:13px; color:var(--muted); line-height:1.55; margin:0; }
+.x-service .st { margin-top:14px; font:500 10px "DM Mono",monospace; color:var(--muted); }
+
+body.light .x-state.stop, body.light .x-verdict.closed, body.light .x-row .dr { color:#b3380e; border-color:#b3380e; }
+body.light .x-denied { color:#b3380e; border-color:#b3380e; }
+body.light .x-box { background:#fff; }
+body.light .x-verdict.cbno, body.light .x-code { color:#c0392b; }
+
+@media(max-width:1100px) { .x-grid { grid-template-columns:repeat(2,1fr); } .x-services { grid-template-columns:repeat(3,1fr); } }
+@media(max-width:900px) {
+  .x-journey, .x-sim, .x-ledger, .x-secure, .x-status { grid-template-columns:1fr; gap:2px; }
+  .x-ledger, .x-secure { gap:44px; }
+  .x-panel { min-height:0; padding:32px 24px; }
+  .x-services { grid-template-columns:repeat(2,1fr); }
+}
+@media(max-width:560px) {
+  .x-grid, .x-services { grid-template-columns:1fr; }
+  .x-fields { grid-template-columns:1fr; } .x-sim-form, .x-sim-out { padding:22px; }
+  .x-step { grid-template-columns:40px 1fr; padding:18px; } .x-step .x-chip { display:none; }
+  .x-row { grid-template-columns:56px 1fr 92px; } .x-row .bal { display:none; }
+  .x-points li { grid-template-columns:1fr; gap:4px; }
+}
+@media(prefers-reduced-motion:reduce) { .x-wire:after { animation:none; opacity:1; top:12px; } .x-flow i { transition:none; } }
+</style>
 </head>
 
 <body>
@@ -265,6 +413,7 @@ body.light .camera-crosshair:before, body.light .camera-crosshair:after { backgr
     <a class="logo" href="#"><span class="logo-mark"><i></i></span> ENSURETECH</a>
     <div class="nav-links">
       <a href="#story">Story</a><a href="#ecosystem">Ecosystem</a><a href="#platform">Platform</a><a href="#principles">Principles</a>
+      <a href="#journey">Journey</a><a href="#window">Simulator</a><a href="#security">Security</a>
     </div>
     <div class="nav-actions">
       <a class="nav-cta mono" href="https://ensuretechinsurancebrokers.github.io/contact_us.html">Contact us →</a>
@@ -381,6 +530,233 @@ body.light .camera-crosshair:before, body.light .camera-crosshair:after { backgr
     </div>
     <p class="copy">The platform is built around modern, open-source technologies selected to support resilient services, asynchronous workloads, structured data, event streaming, and observable operations.</p>
     <div class="tech-wrap"><span class="tech-pill">Python</span><span class="tech-pill">Java</span><span class="tech-pill">Django</span><span class="tech-pill">Spring Boot</span><span class="tech-pill">PostgreSQL</span><span class="tech-pill">Kafka</span><span class="tech-pill">RabbitMQ</span><span class="tech-pill">Docker</span><span class="tech-pill">Next.js</span><span class="tech-pill">Svelte</span></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     Additions: 009-015. Everything above this line is unchanged.
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<section class="section" id="journey">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow mono">/ 009 — THE ENDORSEMENT JOURNEY</div>
+      <h2 class="display">Every change has a path. Every step is on record.</h2>
+    </div>
+    <p class="x-lede">An endorsement is any change to who is covered: someone joins, leaves, or has their details corrected. Here is what happens to one file, in the order it happens, using the real state names the platform records. Select a step.</p>
+    <div class="x-journey" id="x-journey">
+      <div class="x-steps" role="tablist" aria-label="Endorsement steps">
+        <button class="x-step" role="tab" aria-selected="true" data-i="0"><span class="n">01</span><span class="t">Intake</span><span class="x-chip live">live</span></button>
+        <button class="x-step" role="tab" aria-selected="false" data-i="1"><span class="n">02</span><span class="t">Validate</span><span class="x-chip live">live</span></button>
+        <button class="x-step" role="tab" aria-selected="false" data-i="2"><span class="n">03</span><span class="t">Price</span><span class="x-chip live">live</span></button>
+        <button class="x-step" role="tab" aria-selected="false" data-i="3"><span class="n">04</span><span class="t">Cover the cost</span><span class="x-chip live">live</span></button>
+        <button class="x-step" role="tab" aria-selected="false" data-i="4"><span class="n">05</span><span class="t">Endorse</span><span class="x-chip live">live</span></button>
+        <button class="x-step" role="tab" aria-selected="false" data-i="5"><span class="n">06</span><span class="t">Insurer &amp; TPA</span><span class="x-chip next">next</span></button>
+      </div>
+      <div class="x-panel" role="tabpanel" aria-live="polite">
+        <div class="x-flow"><i id="x-flow"></i></div>
+        <span class="mono acid" id="x-j-kicker"></span>
+        <h3 id="x-j-title"></h3>
+        <p id="x-j-body"></p>
+        <p id="x-j-body2"></p>
+        <div class="x-states" id="x-j-states"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="rules" style="padding-top:40px">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow mono">/ 010 — RULES THE REAL WORLD TAUGHT US</div>
+      <h2 class="display">Group insurance is mostly exceptions. We model them.</h2>
+    </div>
+    <p class="x-lede">Years of running endorsements on spreadsheets leave scars, and each scar is a rule. These are the ones the platform enforces today, each configurable per policy instead of buried in code.</p>
+    <div class="x-grid">
+      <article class="x-card reveal"><span class="k">Pricing</span><h3>Pro-rata, per relation</h3><p>Daily or monthly, set for each relation on the policy, so a spouse added in month seven is not priced like a child added in month two. Removals can refund the unused days, in full, or not at all.</p><div class="eg">joins on day 92 of 365 → pays 274/365 of the premium</div></article>
+      <article class="x-card reveal"><span class="k">Eligibility</span><h3>Family construct</h3><p>Which relations are allowed, how many children and parents, age limits, and the age gap a child must have from the employee or the spouse. Twins are allowed only where the policy says so.</p><div class="eg">child 26 y, limit 25 → line rejected, others pass</div></article>
+      <article class="x-card reveal"><span class="k">Who pays</span><h3>Employer and employee share</h3><p>Premium is split by percentage for each relation group: self, spouse, children, parents, parents-in-law. Pro-rata applies to both parts, so the two always add up to the whole.</p><div class="eg">self 100% employer · parents 0% employer</div></article>
+      <article class="x-card reveal"><span class="k">Money</span><h3>Rounding, once</h3><p>None, floor, ceiling or nearest, to a unit the policy chooses (₹10 by default). Applied in one place, after pro-rata and before tax, so every report agrees to the paisa.</p><div class="eg">₹1,234.56 · ceil to ₹10 → ₹1,240.00</div></article>
+      <article class="x-card reveal"><span class="k">Deposits</span><h3>Shared deposit accounts</h3><p>A client deposit can fund one policy, a group of policies, every policy of a company, or an arbitrary set. HR requests a top-up; the broker approves it; the ledger records both.</p><div class="eg">POLICY · GROUP · COMPANY · MULTIPLE</div></article>
+      <article class="x-card reveal"><span class="k">Structure</span><h3>Parent and child companies</h3><p>A holding company's HR sees its subsidiaries and only those. The hierarchy is one level deep and can never loop, and a parent cannot be closed while it still has active children.</p><div class="eg">head office → 3 subsidiaries · no grandchildren</div></article>
+      <article class="x-card reveal"><span class="k">Joining late</span><h3>Mid-term joiners</h3><p>Cover starts from the date of joining, from the day the file was uploaded, or not at all. Dependants have their own rules: a spouse added within 30 days of the marriage is treated differently from one added a year later.</p><div class="eg">spouse · 30 days · from the life event</div></article>
+      <article class="x-card reveal"><span class="k">Timing</span><h3>Enrollment windows</h3><p>A policy-wide window, a custom window for a single employee (it can extend the window, never shorten it), a hard close date, and a freeze on the day an employee confirms. Try it below.</p><div class="eg">↓ interactive, runs the real rules</div></article>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="window" style="padding-top:40px">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow mono">/ 011 — ENROLLMENT WINDOW SIMULATOR</div>
+      <h2 class="display">Can this employee join today? Ask the rules.</h2>
+    </div>
+    <p class="x-lede">This is the platform's decision logic, running in your browser. It is the same rule set, case for case, that the policy service applies and tests, and the numbered lines under the verdict are the rule codes it reports. Change a date and watch the answer, and the reason, change.</p>
+    <div class="x-sim">
+      <div class="x-sim-form">
+        <div class="x-presets" id="x-presets" role="group" aria-label="Examples">
+          <button type="button" data-p="inside">Inside the window</button>
+          <button type="button" data-p="late">Late joiner</button>
+          <button type="button" data-p="custom">HR extends one employee</button>
+          <button type="button" data-p="confirmed">Confirmed, then widened</button>
+          <button type="button" data-p="grace">After the policy expires</button>
+          <button type="button" data-p="nowindow">No window at all</button>
+        </div>
+        <div class="x-fields" id="x-fields">
+          <div class="x-group">The policy</div>
+          <label>Policy starts<input type="date" id="s-ps"></label>
+          <label>Policy ends<input type="date" id="s-pe"></label>
+          <label class="check wide"><input type="checkbox" id="s-en"> The policy has an enrollment window</label>
+          <label>Window opens<input type="date" id="s-ws"></label>
+          <label>Window closes<input type="date" id="s-we"></label>
+          <label>Joining mid-term counts from<select id="s-basis"><option value="DATE_OF_JOINING">Date of joining</option><option value="DATE_OF_UPLOAD">Date of upload</option><option value="NO_MIDTERM">Not allowed</option></select></label>
+          <label>Mid-term days<input type="number" id="s-md" min="1" max="365"></label>
+          <label class="check wide"><input type="checkbox" id="s-ae"> Allow joining after the policy expires</label>
+          <label>Days after expiry<input type="number" id="s-da" min="0" max="365"></label>
+          <div class="x-group">The employee</div>
+          <label>Joined the company<input type="date" id="s-doj"></label>
+          <label>File uploaded on<input type="date" id="s-dou"></label>
+          <label class="check"><input type="checkbox" id="s-inc"> Inception member</label>
+          <label class="check"><input type="checkbox" id="s-cu"> Has a custom window</label>
+          <label>Custom from<input type="date" id="s-cs"></label>
+          <label>Custom until<input type="date" id="s-ce"></label>
+          <label>Hard close (optional)<input type="date" id="s-cc"></label>
+          <label class="check"><input type="checkbox" id="s-cf"> Has confirmed</label>
+          <label class="check"><input type="checkbox" id="s-hm" checked> Opted in to cover</label>
+          <div class="x-group">The day we ask</div>
+          <label>As of<input type="date" id="s-today"></label>
+          <label>&nbsp;<button type="button" class="x-today" id="s-now">Use today's date</button></label>
+        </div>
+      </div>
+      <div class="x-sim-out" aria-live="polite">
+        <div class="mono acid">VERDICT</div>
+        <div class="x-verdict" id="o-verdict">—</div>
+        <div class="x-facts">
+          <div><small>Window</small><span id="o-window">—</span></div>
+          <div><small>Custom window</small><span id="o-custom">—</span></div>
+          <div><small>Mid-term applies</small><span id="o-mid">—</span></div>
+          <div><small>Runs past policy end</small><span id="o-end">—</span></div>
+        </div>
+        <div><div class="mono" style="color:var(--muted);margin-bottom:10px">WHY</div><ol class="x-trace" id="o-trace"></ol></div>
+        <p class="x-note">Dates are checked by day, inclusive at both ends. A confirmed employee keeps the dates they confirmed under, even if the policy window is widened later. The rules and their tests live in the open in the policy service.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="ledger" style="padding-top:40px">
+  <div class="container x-ledger">
+    <div>
+      <div class="eyebrow mono">/ 012 — MONEY YOU CAN AUDIT</div>
+      <h2 class="display" style="margin-top:22px">A ledger, not a balance.</h2>
+      <p class="copy" style="margin-top:28px">The client deposit is the money an endorsement draws on. We never store a number and update it; we store what happened. The balance is the sum of the entries, and each entry says who, why, and against which endorsement.</p>
+      <ul class="x-points">
+        <li><span>Append-only</span>Entries are added, never edited. A correction is a new, opposite entry with its own reason.</li>
+        <li><span>Replay-safe</span>Recording the same bank reference twice returns the original entry. A retried request cannot double-credit an account.</li>
+        <li><span>Exact</span>Amounts with more than two decimals are refused, not quietly rounded. Reservations expire after 24 hours so a stuck job cannot lock funds.</li>
+        <li><span>Early warning</span>A threshold per account raises a flag before an endorsement is blocked, and the dashboard shows which policies are low.</li>
+      </ul>
+    </div>
+    <div class="x-table" aria-label="Example deposit ledger">
+      <div class="x-table-head"><span class="mono acid">POLICY #4 · DEPOSIT LEDGER</span><span class="x-chip">example</span></div>
+      <div class="x-row h"><span>Type</span><span>Reference</span><span class="amt">Amount</span><span class="bal">Balance</span></div>
+      <div class="x-row"><span class="cr">CREDIT</span><span>UTR-1001<small>deposit · recorded by broker</small></span><span class="amt cr">+50,000.00</span><span class="bal">50,000.00</span></div>
+      <div class="x-row"><span class="dr">DEBIT</span><span>ENDORSEMENT<small>a255adc3… · 4 members added</small></span><span class="amt dr">−3,931.18</span><span class="bal">46,068.82</span></div>
+      <div class="x-row"><span class="cr">CREDIT</span><span>HR-TOPUP-1<small>requested by HR · approved by broker</small></span><span class="amt cr">+5,000.00</span><span class="bal">51,068.82</span></div>
+      <div class="x-row low"><span class="mono acid" style="font-size:10px">NEXT</span><span>A 4.2 lakh file arrives<small>needs more than is available → CD_INSUFFICIENT</small></span><span class="amt">held</span><span class="bal">—</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="security" style="padding-top:40px">
+  <div class="container x-secure">
+    <div class="x-door" aria-label="One door in">
+      <div class="x-lane"><div class="x-box"><b>Browser</b>holds a session cookie, nothing else</div></div>
+      <div class="x-wire"></div>
+      <div class="x-box gate"><b>The gateway</b>one public surface · checks the token · shapes every response</div>
+      <div class="x-wire"></div>
+      <div class="x-svc">
+        <div class="x-box">Identity</div><div class="x-box">Organization</div><div class="x-box">Policy</div>
+        <div class="x-box">Billing</div><div class="x-box">Endorsement</div><div class="x-box">Integration</div>
+      </div>
+      <div class="x-denied"><span>Direct call, valid token</span><span>403 · refused</span></div>
+    </div>
+    <div>
+      <div class="eyebrow mono">/ 013 — SECURITY BY CONSTRUCTION</div>
+      <h2 class="display" style="margin-top:22px">One door in. Everything else is closed.</h2>
+      <p class="copy" style="margin-top:28px">Customer data is the product, so the boundaries are structural rather than a checklist someone has to remember.</p>
+      <ul class="x-points">
+        <li><span>Gateway only</span>Every core service demands a shared secret and a per-session key, so a stolen token used directly against a service is refused.</li>
+        <li><span>Your tenant</span>Who you are and which broker or employer you belong to come from the signed token, never from the request. Another tenant's record answers "not found".</li>
+        <li><span>No catch-all</span>The gateway has a written contract of exactly which calls exist. A path that is not in it does not exist.</li>
+        <li><span>Nothing leaks</span>Responses are allow-lists, so a new internal field cannot reach the screen by accident, and errors never carry a stack trace.</li>
+        <li><span>Tokens stay home</span>The portal keeps tokens in an encrypted server session. The browser never holds one.</li>
+        <li><span>Watching</span>Rate limits per user and per tenant, decoy routes that log probes, and an audit trail on every state change.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="status" style="padding-top:40px">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow mono">/ 014 — STATUS, HONESTLY</div>
+      <h2 class="display">What works today, and what still needs a partner.</h2>
+    </div>
+    <p class="x-lede">A platform that touches money and cover should say plainly where it stands. Three columns: what is built and tested, what is built but cannot be proven without someone else's system, and what we have not started.</p>
+    <div class="x-status">
+      <div class="x-col built"><span class="x-chip live">built &amp; tested</span><h3>Running end to end</h3><p>Verified together, from sign-in to a debited ledger.</p>
+        <ul>
+          <li>CSV and form intake, line-by-line validation<small>idempotent uploads, per-line errors</small></li>
+          <li>Pricing across the premium types, pro-rata per relation<small>flat, age-band, grade, GDAC, floaters, per-mille, LOL</small></li>
+          <li>Deposit ledger, top-up requests, shared accounts</li>
+          <li>Enrollment windows, mid-term and dependant rules</li>
+          <li>Parent and child companies, announcements</li>
+          <li>Dashboards and activity feeds fed by events</li>
+          <li>A broker and HR portal with live progress</li>
+        </ul></div>
+      <div class="x-col"><span class="x-chip">built · needs a partner</span><h3>Waiting on other systems</h3><p>The code exists; proof needs credentials or samples we do not own.</p>
+        <ul>
+          <li>TPA connection and roster reconciliation<small>a generic REST adapter and matching rules; each TPA needs its own contract and sandbox</small></li>
+          <li>Post-endorsement states<small>sent to insurer, TPA confirmation, e-card, endorsement copy are modelled; the insurer adapters are not</small></li>
+          <li>Email notifications<small>templates and queue built; delivery needs a mail provider</small></li>
+        </ul></div>
+      <div class="x-col next"><span class="x-chip next">next</span><h3>Not started</h3><p>On the list, in this order of likelihood.</p>
+        <ul>
+          <li>Per-insurer and per-TPA adapters</li>
+          <li>Blocking an upload when the employee's window is closed<small>the check exists; the policy for blocking versus warning is a business decision</small></li>
+          <li>SMS and WhatsApp</li>
+          <li>Payment collection for deposits</li>
+          <li>Identity verification (PAN is stored, not verified)</li>
+        </ul></div>
+    </div>
+    <div class="x-proof">
+      <div>600+<small>automated tests<br>across 8 services</small></div>
+      <div>10<small>cooperating services<br>one public door</small></div>
+      <div>5<small>event streams keep<br>every service in step</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="services" style="padding-top:40px">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow mono">/ 015 — UNDER THE HOOD</div>
+      <h2 class="display">Ten small services, each owning one thing.</h2>
+    </div>
+    <p class="x-lede">Each service has its own database and talks to the others through events and narrow APIs. The data a service does not own, it asks for or hears about, so one team's change cannot quietly break another's.</p>
+    <div class="x-services">
+      <div class="x-service reveal"><span class="k">01 · Gateway</span><h3>BFF &amp; portal</h3><p>The only public surface: validates input, shapes output, serves the broker and HR portal.</p><div class="st">Laravel · PHP</div></div>
+      <div class="x-service reveal"><span class="k">02 · Who</span><h3>Identity</h3><p>Sign-in, tokens, roles, and machine accounts for service-to-service calls.</p><div class="st">Django · PostgreSQL</div></div>
+      <div class="x-service reveal"><span class="k">03 · Whom</span><h3>Organization</h3><p>Brokers, branches, employers and their hierarchy, plus announcements.</p><div class="st">Spring Boot · PostgreSQL</div></div>
+      <div class="x-service reveal"><span class="k">04 · What</span><h3>Policy</h3><p>Policies, rate cards, family rules, windows, and the pricing engine.</p><div class="st">Spring Boot · gRPC · Redis</div></div>
+      <div class="x-service reveal"><span class="k">05 · How much</span><h3>Billing</h3><p>The deposit ledger: credits, reservations, debits, top-ups, pools.</p><div class="st">Spring Boot · gRPC</div></div>
+      <div class="x-service reveal"><span class="k">06 · Change</span><h3>Endorsement engine</h3><p>Takes a file through validation, pricing, funding and execution, with an audit trail.</p><div class="st">Django · Celery · ASGI</div></div>
+      <div class="x-service reveal"><span class="k">07 · Outside</span><h3>Integration</h3><p>TPA connections, retries with backoff, and roster reconciliation.</p><div class="st">Spring Boot</div></div>
+      <div class="x-service reveal"><span class="k">08 · Insight</span><h3>Read service</h3><p>Dashboards, red flags, reports and the knowledge-base assistant.</p><div class="st">Django · MongoDB</div></div>
+      <div class="x-service reveal"><span class="k">09 · Tell</span><h3>Notification</h3><p>Turns events into emails, with a queue that survives crashes.</p><div class="st">Django · SMTP</div></div>
+      <div class="x-service reveal"><span class="k">10 · Prepare</span><h3>Sheet generator</h3><p>Builds the exact upload sheet a policy needs, and works offline in a browser.</p><div class="st">Spring Boot · static page</div></div>
+    </div>
   </div>
 </section>
 
@@ -544,6 +920,185 @@ if (!reduceMotion) {
     );
   });
 }
+</script>
+<script>
+/* Additions: the endorsement journey (009) and the enrollment window simulator (011). */
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---- 009: journey ---------------------------------------------------- */
+  var STEPS = [
+    { k: "STEP 01 · INTAKE", t: "The file lands safely first",
+      a: "A CSV, the form editor or an API call. The file is streamed to disk and fingerprinted, and a job is raised before anything is parsed, so a huge or messy upload never blocks the person sending it. Sending the same file again with the same idempotency key returns the same job instead of creating a duplicate.",
+      b: "Column names are matched to our fields automatically (\"Emp Code\", \"Member Name\", \"DOB\"…), and a saved mapping remembers how your HRMS names things.",
+      s: [["REQUEST_RAISED", ""], ["FILE_STREAMED", "ok"]] },
+    { k: "STEP 02 · VALIDATE", t: "Every line judged on its own",
+      a: "Dates in any common format, PAN shape, gender, relation, sum insured, the policy's family construct, per-relation age rules, mid-term and window rules. Problems are collected per line, so one bad row never rejects the file.",
+      b: "If some lines fail, the job stops at VALIDATION_PARTIAL with a list: line number, employee, field, rule, and what is wrong. HR fixes those lines and re-uploads only them.",
+      s: [["VALIDATION_QUEUED", ""], ["VALIDATION_IN_PROGRESS", ""], ["VALIDATION_PASSED", "ok"], ["VALIDATION_PARTIAL", "stop"]] },
+    { k: "STEP 03 · PRICE", t: "One engine decides the premium",
+      a: "The policy service rates every member from the policy's own rate card (flat, age band, grade, GDAC, floaters, per-mille, LOL and more), prorates by relation, applies the employer and employee share and the rounding rule, then tax.",
+      b: "Pricing happens in one place, over a typed gRPC contract. The engine that checks your file and the engine that quotes your premium cannot disagree, because they are the same engine.",
+      s: [["PREMIUM_CALC_QUEUED", ""], ["PREMIUM_CALCULATED", "ok"]] },
+    { k: "STEP 04 · COVER THE COST", t: "The deposit must cover it",
+      a: "The billing service checks the policy's deposit account and reserves the amount. If it falls short, the job stops at CD_INSUFFICIENT and the broker and HR can see exactly by how much.",
+      b: "After a top-up, Retry resumes the same job. Nothing is re-uploaded, re-validated or re-priced by hand.",
+      s: [["CD_CHECK", ""], ["CD_INSUFFICIENT", "stop"], ["CD_SUFFICIENT", "ok"]] },
+    { k: "STEP 05 · ENDORSE", t: "The roster changes, the ledger moves",
+      a: "Members are added, removed or updated, the deposit is debited with the endorsement's id as the reference, and the job reaches ENDORSED. Every transition is audited with who, when and how long it took.",
+      b: "State changes are published as events through a transactional outbox, so dashboards, reports and notifications follow without any service reaching into another's database.",
+      s: [["ENDORSEMENT_IN_PROGRESS", ""], ["ENDORSED", "ok"], ["CANCELLED_BY_HR", "stop"]] },
+    { k: "STEP 06 · INSURER & TPA · NEXT", t: "Reaching the other side",
+      a: "After the roster changes, the endorsement still has to reach the insurer, be confirmed by the TPA, and produce e-cards and an endorsement copy. Those stages exist as states (sent to insurer, awaiting TPA confirmation, e-cards awaited, endorsement copy, partially processed, closed) and an operator can move a job through them.",
+      b: "What is not built yet is the adapter for each insurer and TPA. Each needs its own contract, credentials and sample responses. The generic connector and the roster reconciliation are in place and tested against a stand-in.",
+      s: [["SENT_TO_INSURER", ""], ["AWAITING_TPA_CONFIRMATION", ""], ["ECARDS_AWAITED_FROM_TPA", ""], ["PARTIAL_PROCESSED", "stop"], ["CLOSED", "ok"]] }
+  ];
+  var steps = document.querySelectorAll(".x-step");
+  function show(i) {
+    var d = STEPS[i];
+    steps.forEach(function (b, n) { b.setAttribute("aria-selected", n === i ? "true" : "false"); });
+    $("x-j-kicker").textContent = d.k; $("x-j-title").textContent = d.t; $("x-j-body").textContent = d.a; $("x-j-body2").textContent = d.b;
+    var box = $("x-j-states"); box.textContent = "";
+    d.s.forEach(function (st) { var e = document.createElement("span"); e.className = "x-state" + (st[1] ? " " + st[1] : ""); e.textContent = st[0]; box.appendChild(e); });
+    $("x-flow").style.width = ((i + 1) / STEPS.length * 100) + "%";
+  }
+  steps.forEach(function (b) { b.addEventListener("click", function () { show(+b.dataset.i); }); });
+  if (steps.length) show(0);
+
+  /* ---- 011: simulator -------------------------------------------------- */
+  /* Enrollment-window evaluator. A JavaScript port of EnrollmentWindowEvaluator (policy-service), which is itself a port of the legacy EnrollmentWindowService.
+   The numbers in the trace are the legacy rule codes. Dates are ISO strings (YYYY-MM-DD) so they compare as text. */
+function etAddDays(iso, n) { const d = new Date(iso + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+function etEvaluate(s, policyStart, policyEnd, basis, today, e) {
+  const w = { status: "CLOSED", start: null, end: null, confirmed: false, window: true, midterm: true, endterm: false, custom: false, closeDate: e.custom ? e.custom.closeDate || null : null };
+  const trace = [];
+  const t = (code, msg) => trace.push([code, msg]);
+  const within = (d, a, b) => a && b && d >= a && d <= b;
+  const c = e.confirmation;
+  const o = e.custom;
+
+  function midterm() {
+    const from = basis === "DATE_OF_JOINING" ? e.doj : basis === "DATE_OF_UPLOAD" ? e.dou : null;
+    if (!from) return;
+    const until = etAddDays(from, s.midtermDays - 1);
+    w.start = from; w.end = until;
+    if (w.closeDate && today > w.closeDate) { w.status = "CLOSED"; t(731, "the employee's hard close date has passed"); }
+    else if (basis === "DATE_OF_JOINING") {
+      w.status = until >= today && from <= today ? "OPEN" : "CLOSED";
+      t(w.status === "OPEN" ? 721 : 731, "mid-term window from date of joining: " + from + " for " + s.midtermDays + " days");
+    } else {
+      w.status = until >= today ? "OPEN" : "CLOSED";
+      t(w.status === "OPEN" ? 761 : 771, "mid-term window from date of upload: " + from + " for " + s.midtermDays + " days");
+    }
+  }
+
+  function policyLevel() {
+    w.status = "CLOSED"; w.window = true; w.midterm = true;
+    let need = false;
+    const hasWindow = s.enabled && s.start && s.end;
+    if (hasWindow) {
+      const inside = within(today, s.start, s.end);
+      if (w.closeDate && today > w.closeDate) { w.status = "CLOSED"; w.start = s.start; w.end = s.end; t(501, "the employee's hard close date has passed"); }
+      else if (today < policyStart || inside) {
+        w.status = "OPEN"; w.start = s.start; w.end = s.end; t(511, "inside the policy's enrollment window");
+        if (today < policyStart && !inside) { w.status = "CLOSED"; t(521, "before the policy starts and before its window opens (pre-enrollment)"); }
+      } else {
+        w.status = "CLOSED"; w.start = s.start; w.end = s.end; t(531, "the policy's window has closed");
+        if (basis === "DATE_OF_JOINING" && e.doj) { if (e.doj > policyStart && e.doj > s.end) { need = true; t(541, "joined after the window: mid-term applies (date of joining)"); } }
+        else if (basis === "DATE_OF_UPLOAD" && e.dou) { if (e.dou > policyStart && e.dou > s.end) { need = true; t(551, "uploaded after the window: mid-term applies (date of upload)"); } }
+      }
+    } else { w.window = false; t(599, "the policy has no enrollment window"); }
+    if (basis === "NO_MIDTERM") { w.midterm = false; need = false; t(599, "mid-term joining is switched off for this policy"); }
+    if (!hasWindow) {
+      if (basis === "DATE_OF_JOINING" && !e.inception && e.doj) { need = true; t(601, "no window: mid-term from date of joining is the only way in"); }
+      else if (basis === "DATE_OF_UPLOAD" && !e.inception) { need = true; t(611, "no window: mid-term from date of upload is the only way in"); }
+      if (e.inception) { w.midterm = false; t(621, "inception members never get a mid-term window"); }
+    }
+    if (e.doj && e.doj < policyStart) { need = false; w.midterm = false; t(651, "joined before the policy began: no mid-term window"); }
+    if (need) midterm();
+  }
+
+  if (c && !e.hasMembers) { w.status = "CONFIRMED_BUT_NOT_OPTED"; t(100, "confirmed, but never opted in to any cover"); return { w, trace }; }
+  if (c) { w.status = "CONFIRMED"; w.confirmed = true; w.start = c.start; w.end = c.end; t(302, "confirmed: the dates are frozen as they were on the day of confirmation"); }
+  else policyLevel();
+
+  if (o && o.enabled) {
+    w.custom = true;
+    const policyWide = w.end || "1900-01-01";
+    if (o.end && o.end >= policyWide) {
+      if (c) { w.status = "CONFIRMED"; w.start = c.start; w.end = c.end; t(323, "confirmed: a custom window changes nothing"); }
+      else {
+        w.start = o.start; w.end = o.end;
+        if (o.closeDate && today > o.closeDate) { w.status = "CLOSED"; t(322, "custom window: its hard close date has passed"); }
+        else if (today >= o.start && today <= o.end) { w.status = "OPEN"; t(331, "inside this employee's custom window"); }
+        else { w.status = "CLOSED"; t(332, "outside this employee's custom window"); }
+      }
+    } else t(321, "custom window ends before the policy window, so it is ignored: a custom window can extend, never shorten");
+  }
+
+  if (w.end && w.end > policyEnd) {
+    if (w.midterm && !w.custom && !s.allowAfterExpiry) {
+      if (w.status === "OPEN") { if (today > policyEnd) { w.status = "CLOSED"; t(419, "the window runs past the policy end and the policy has ended"); } else { w.endterm = true; t(419, "the window runs past the policy end"); } }
+    } else if (w.midterm && s.allowAfterExpiry && w.status !== "CONFIRMED") {
+      const upload = e.dou || policyEnd, base = upload > policyEnd ? upload : policyEnd, validity = etAddDays(base, s.daysAfterExpiry);
+      if (w.end > validity) { w.status = today <= validity ? "OPEN" : "CLOSED"; w.end = validity; }
+      else w.status = today <= w.end ? "OPEN" : "CLOSED";
+      t(431, "joining is allowed for " + s.daysAfterExpiry + " days after the policy expires (until " + w.end + ")");
+    } else { w.end = policyEnd; if (w.status === "OPEN" && today > policyEnd) w.status = "CLOSED"; t(421, "the window is cut at the policy's end date"); }
+  }
+  return { w, trace };
+}
+
+
+  var F = ["ps", "pe", "ws", "we", "md", "da", "doj", "dou", "cs", "ce", "cc", "today"], C = ["en", "ae", "inc", "cu", "cf", "hm"];
+  var PRESETS = {
+    inside:    { ps: "2030-04-01", pe: "2031-03-31", en: 1, ws: "2030-03-01", we: "2030-04-30", basis: "DATE_OF_JOINING", md: 30, ae: 0, da: 0, doj: "2030-04-02", dou: "2030-04-02", inc: 0, cu: 0, cf: 0, hm: 1, today: "2030-04-10" },
+    late:      { ps: "2030-04-01", pe: "2031-03-31", en: 1, ws: "2030-03-01", we: "2030-04-30", basis: "DATE_OF_JOINING", md: 30, ae: 0, da: 0, doj: "2030-06-01", dou: "2030-06-01", inc: 0, cu: 0, cf: 0, hm: 1, today: "2030-06-20" },
+    custom:    { ps: "2030-04-01", pe: "2031-03-31", en: 1, ws: "2030-03-01", we: "2030-04-30", basis: "NO_MIDTERM", md: 30, ae: 0, da: 0, doj: "2030-04-02", dou: "2030-04-02", inc: 0, cu: 1, cs: "2030-05-01", ce: "2030-05-20", cc: "", cf: 0, hm: 1, today: "2030-05-10" },
+    confirmed: { ps: "2030-04-01", pe: "2031-03-31", en: 1, ws: "2030-03-01", we: "2030-12-31", basis: "DATE_OF_JOINING", md: 30, ae: 0, da: 0, doj: "2030-04-02", dou: "2030-04-02", inc: 0, cu: 0, cf: 1, hm: 1, today: "2030-04-15" },
+    grace:     { ps: "2030-04-01", pe: "2031-03-31", en: 1, ws: "2030-03-01", we: "2031-06-30", basis: "DATE_OF_JOINING", md: 30, ae: 1, da: 20, doj: "2030-04-02", dou: "2030-04-02", inc: 0, cu: 0, cf: 0, hm: 1, today: "2031-04-15" },
+    nowindow:  { ps: "2030-04-01", pe: "2031-03-31", en: 0, ws: "", we: "", basis: "DATE_OF_JOINING", md: 30, ae: 0, da: 0, doj: "2030-06-01", dou: "2030-06-01", inc: 0, cu: 0, cf: 0, hm: 1, today: "2030-06-10" }
+  };
+  var VERDICT = { OPEN: ["Open", "open"], CLOSED: ["Closed", "closed"], CONFIRMED: ["Confirmed", "confirmed"], CONFIRMED_BUT_NOT_OPTED: ["Confirmed, but not opted in", "cbno"] };
+
+  function val(id) { var v = $("s-" + id).value; return v === "" ? null : v; }
+  function chk(id) { return $("s-" + id).checked; }
+  function fmt(a, b) { return a && b ? a + " → " + b : "—"; }
+  function run() {
+    if (!$("o-verdict")) return;
+    var ps = val("ps"), pe = val("pe"), today = val("today");
+    if (!ps || !pe || !today) { $("o-verdict").textContent = "—"; $("o-verdict").className = "x-verdict"; return; }
+    var s = { enabled: chk("en"), start: val("ws"), end: val("we"), midtermDays: Math.max(1, Math.min(365, +val("md") || 30)), allowAfterExpiry: chk("ae"), daysAfterExpiry: Math.max(0, Math.min(365, +val("da") || 0)) };
+    var e = { doj: val("doj"), dou: val("dou"), hasMembers: chk("hm"), inception: chk("inc"),
+              custom: chk("cu") && val("cs") && val("ce") ? { enabled: true, start: val("cs"), end: val("ce"), closeDate: val("cc") } : (val("cc") ? { enabled: false, start: val("cs") || ps, end: val("ce") || pe, closeDate: val("cc") } : null),
+              confirmation: chk("cf") ? { start: "2030-03-01", end: "2030-04-30" } : null };   // a confirmation freezes the dates in force that day (the original 1 Mar to 30 Apr window)
+    var r = etEvaluate(s, ps, pe, val("basis"), today, e), w = r.w, v = VERDICT[w.status];
+    $("o-verdict").textContent = v[0]; $("o-verdict").className = "x-verdict " + v[1];
+    $("o-window").textContent = fmt(w.start, w.end);
+    $("o-custom").textContent = w.custom ? "yes" : "no";
+    $("o-mid").textContent = w.midterm ? "yes" : "no";
+    $("o-end").textContent = w.endterm ? "yes" : "no";
+    var ol = $("o-trace"); ol.textContent = "";
+    if (!r.trace.length) r.trace.push(["—", "No rule applied: nothing opens a window for this employee on this day."]);
+    r.trace.forEach(function (t) { var li = document.createElement("li"), b = document.createElement("b"); b.textContent = t[0]; li.appendChild(b); li.appendChild(document.createTextNode(t[1])); ol.appendChild(li); });
+  }
+  function apply(name) {
+    var p = PRESETS[name]; if (!p) return;
+    F.forEach(function (id) { $("s-" + id).value = p[id] == null ? "" : p[id]; });
+    C.forEach(function (id) { $("s-" + id).checked = !!p[id]; });
+    $("s-basis").value = p.basis;
+    document.querySelectorAll("#x-presets button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.p === name ? "true" : "false"); });
+    run();
+  }
+  if ($("x-fields")) {
+    document.querySelectorAll("#x-presets button").forEach(function (b) { b.addEventListener("click", function () { apply(b.dataset.p); }); });
+    $("x-fields").addEventListener("input", function () { document.querySelectorAll("#x-presets button").forEach(function (b) { b.setAttribute("aria-pressed", "false"); }); run(); });
+    $("s-now").addEventListener("click", function () { $("s-today").value = new Date().toISOString().slice(0, 10); run(); });
+    apply("late");
+  }
+})();
+
 </script>
 </body>
 </html>

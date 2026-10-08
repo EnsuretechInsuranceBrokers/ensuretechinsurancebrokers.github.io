@@ -1,0 +1,32 @@
+// Run: node tests/enrollment-window.test.js
+// The same 17 cases as EnrollmentWindowEvaluatorTest.java in the platform's policy-service, run against the copy of the rules inside index.html.
+const fs = require("fs"); const assert = require("assert");
+// The evaluator is inline in index.html (the site has no build step). Cut it out between its two markers and run it here.
+const page = fs.readFileSync(__dirname + "/../index.html", "utf8");
+const a = page.indexOf("/* Enrollment-window evaluator."), b = page.indexOf("var F = [\"ps\"");
+assert(a > 0 && b > a, "evaluator markers not found in index.html");
+eval(page.slice(a, b) + "; globalThis.etEvaluate = etEvaluate;");
+const PS = "2030-04-01", PE = "2031-03-31";
+const WINDOW = { enabled: true, start: "2030-03-01", end: "2030-04-30", midtermDays: 30, allowAfterExpiry: false, daysAfterExpiry: 0 };
+const NOWIN = { enabled: false, start: null, end: null, midtermDays: 30, allowAfterExpiry: false, daysAfterExpiry: 0 };
+const emp = (doj, dou, x = {}) => Object.assign({ doj, dou, hasMembers: true, inception: false, custom: null, confirmation: null }, x);
+const ev = (s, basis, today, e) => etEvaluate(s, PS, PE, basis, today, e).w;
+let n = 0; const ok = (name, f) => { f(); n++; };
+ok("inside window", () => { const r = ev(WINDOW, "DATE_OF_JOINING", "2030-04-10", emp("2030-04-02", "2030-04-02")); assert.equal(r.status, "OPEN"); assert.equal(r.end, "2030-04-30"); assert(r.window); });
+ok("pre-enrollment", () => assert.equal(ev(WINDOW, "DATE_OF_JOINING", "2030-02-15", emp("2030-04-02", "2030-02-15")).status, "CLOSED"));
+ok("close date", () => assert.equal(ev(WINDOW, "NO_MIDTERM", "2030-04-10", emp("2030-04-02", "2030-04-02", { custom: { enabled: false, start: "2030-04-01", end: "2030-04-30", closeDate: "2030-04-05" } })).status, "CLOSED"));
+ok("no midterm", () => { const r = ev(WINDOW, "NO_MIDTERM", "2030-06-01", emp("2030-05-20", "2030-05-20")); assert.equal(r.status, "CLOSED"); assert(!r.midterm); });
+ok("midterm DOJ", () => { const e = emp("2030-06-01", "2030-06-01"); const o = ev(WINDOW, "DATE_OF_JOINING", "2030-06-30", e); assert.equal(o.status, "OPEN"); assert.equal(o.end, "2030-06-30"); assert.equal(ev(WINDOW, "DATE_OF_JOINING", "2030-07-01", e).status, "CLOSED"); });
+ok("midterm DOJ not before joining", () => assert.equal(ev(WINDOW, "DATE_OF_JOINING", "2030-05-20", emp("2030-06-01", "2030-05-20")).status, "CLOSED"));
+ok("midterm DOU", () => { const e = emp("2030-05-10", "2030-06-15"); assert.equal(ev(WINDOW, "DATE_OF_UPLOAD", "2030-07-14", e).status, "OPEN"); assert.equal(ev(WINDOW, "DATE_OF_UPLOAD", "2030-07-15", e).status, "CLOSED"); });
+ok("joined before policy", () => { const r = ev(NOWIN, "DATE_OF_JOINING", "2030-06-05", emp("2030-03-15", "2030-06-05")); assert.equal(r.status, "CLOSED"); assert(!r.midterm); });
+ok("inception", () => assert(!ev(NOWIN, "DATE_OF_JOINING", "2030-06-10", emp("2030-06-01", "2030-06-01", { inception: true })).midterm));
+ok("no window, midterm only", () => { const r = ev(NOWIN, "DATE_OF_JOINING", "2030-06-10", emp("2030-06-01", "2030-06-01")); assert.equal(r.status, "OPEN"); assert(!r.window); });
+ok("custom extends", () => { const r = ev(WINDOW, "NO_MIDTERM", "2030-05-10", emp("2030-04-02", "2030-04-02", { custom: { enabled: true, start: "2030-05-01", end: "2030-05-20" } })); assert.equal(r.status, "OPEN"); assert.equal(r.end, "2030-05-20"); assert(r.custom); });
+ok("custom never shortens", () => { const r = ev(WINDOW, "NO_MIDTERM", "2030-04-20", emp("2030-04-02", "2030-04-02", { custom: { enabled: true, start: "2030-04-01", end: "2030-04-10" } })); assert.equal(r.status, "OPEN"); assert.equal(r.end, "2030-04-30"); });
+ok("custom close date", () => assert.equal(ev(WINDOW, "NO_MIDTERM", "2030-05-10", emp("2030-04-02", "2030-04-02", { custom: { enabled: true, start: "2030-05-01", end: "2030-05-20", closeDate: "2030-05-05" } })).status, "CLOSED"));
+ok("confirmed frozen", () => { const c = { start: "2030-03-01", end: "2030-04-30" }; const r = ev({ ...WINDOW, end: "2030-12-31" }, "DATE_OF_JOINING", "2030-04-15", emp("2030-04-02", "2030-04-02", { confirmation: c })); assert.equal(r.status, "CONFIRMED"); assert.equal(r.end, "2030-04-30"); });
+ok("confirmed not opted", () => assert.equal(ev(WINDOW, "NO_MIDTERM", "2030-04-15", emp("2030-04-02", "2030-04-02", { hasMembers: false, confirmation: { start: "2030-03-01", end: "2030-04-30" } })).status, "CONFIRMED_BUT_NOT_OPTED"));
+ok("cut at policy end", () => { const late = { ...WINDOW, end: "2031-06-30" }; const a = ev(late, "NO_MIDTERM", "2031-03-31", emp("2030-04-02", "2030-04-02")); assert.equal(a.end, PE); assert.equal(a.status, "OPEN"); assert.equal(ev(late, "NO_MIDTERM", "2031-04-01", emp("2030-04-02", "2030-04-02")).status, "CLOSED"); });
+ok("after expiry", () => { const after = { ...WINDOW, end: "2031-06-30", allowAfterExpiry: true, daysAfterExpiry: 20 }; const e = emp("2030-04-02", "2030-04-02"); const o = ev(after, "DATE_OF_JOINING", "2031-04-15", e); assert.equal(o.status, "OPEN"); assert.equal(o.end, "2031-04-20"); assert.equal(ev(after, "DATE_OF_JOINING", "2031-04-21", e).status, "CLOSED"); });
+console.log(n + " cases pass (same as the 17 in EnrollmentWindowEvaluatorTest.java)");
