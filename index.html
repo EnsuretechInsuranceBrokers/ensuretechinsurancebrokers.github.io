@@ -236,9 +236,13 @@ body.light .camera-crosshair:before, body.light .camera-crosshair:after { backgr
 .vision-sub { font-size:clamp(18px,1.9vw,24px); line-height:1.35; letter-spacing:-.03em; color:var(--ink); margin:0; max-width:420px; }
 
 /* convergence orbit: six stakeholders evenly spaced, kept upright while the ring turns */
-.radar { width:100%; } .radar svg.spokes { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
+.radar { width:100%; --tilt:.58; perspective:900px; }
+.radar:before { transform:scaleY(var(--tilt)); border-color:color-mix(in srgb,var(--acid) 28%,transparent); } .radar:after { transform:scaleY(var(--tilt)); border-color:color-mix(in srgb,var(--accent2) 22%,transparent); border-style:dashed; }
+.radar svg.spokes circle.packet { fill:var(--acid); filter:drop-shadow(0 0 1.6px var(--acid)); }
+.radar .radar-center { transform:translateZ(0); }
+.radar svg.spokes { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
 .radar svg.spokes line { stroke:var(--acid); stroke-opacity:.35; stroke-width:.4; stroke-dasharray:1.2 1.6; }
-.radar .node { left:50%; top:50%; right:auto; bottom:auto; white-space:nowrap; z-index:3; display:flex; align-items:center; gap:7px; border-color:color-mix(in srgb,var(--c) 55%,transparent); background:var(--bg); color:var(--ink); }
+.radar .node { will-change:transform,opacity; left:50%; top:50%; right:auto; bottom:auto; white-space:nowrap; z-index:3; display:flex; align-items:center; gap:7px; border-color:color-mix(in srgb,var(--c) 55%,transparent); background:var(--bg); color:var(--ink); }
 .radar .node:before { content:""; width:7px; height:7px; background:var(--c); border-radius:50%; box-shadow:0 0 10px var(--c); }
 .radar .node:nth-of-type(odd) { --c:var(--acid); } .radar .node:nth-of-type(even) { --c:var(--accent2); }
 body.light .radar .node { background:#fff; }
@@ -827,17 +831,37 @@ setTheme(savedTheme === "light");
 
 themeToggle.addEventListener("click", () => setTheme(!body.classList.contains("light")));
 
-// (the ring turns; each label is counter-rotated so it always reads upright and nothing overlaps)
+// The orbit is a tilted ring: labels travel an ellipse, grow and brighten as they swing to the front, shrink and dim at the back,
+// and stay upright. Data packets run in from every label to the centre. The pointer tips the ring a little.
 const radar = document.querySelector("#radar");
 const orbitNodes = [...radar.querySelectorAll(".node")];
 const spokes = radar.querySelector(".spokes");
-orbitNodes.forEach((_, i) => { const a = i * Math.PI / 3 - Math.PI / 2; spokes.insertAdjacentHTML("beforeend", `<line x1="0" y1="0" x2="${(Math.cos(a) * 40).toFixed(2)}" y2="${(Math.sin(a) * 40).toFixed(2)}"/>`); });
-const spin = { r: 0 };
-const place = () => { const R = radar.offsetWidth * .4;
-  orbitNodes.forEach((n, i) => { const a = i * 60;
-    n.style.transform = `translate(-50%,-50%) rotate(${a + spin.r}deg) translateY(${-R}px) rotate(${-(a + spin.r)}deg)`; });
-  radar.style.setProperty("--spin", spin.r + "deg"); };
-if (!reduceMotion) gsap.to(spin, { r: 360, duration: 60, repeat: -1, ease: "none", onUpdate: () => { spokes.style.transform = `rotate(${spin.r}deg)`; place(); } });
+const NS = "http://www.w3.org/2000/svg";
+const lines = orbitNodes.map(() => { const l = document.createElementNS(NS, "line"); l.setAttribute("x1", 0); l.setAttribute("y1", 0); spokes.append(l); return l; });
+const packets = orbitNodes.map(() => { const c = document.createElementNS(NS, "circle"); c.setAttribute("r", 1.1); c.setAttribute("class", "packet"); spokes.append(c); return c; });
+const orbit = { spin: 0, tilt: .58, tiltTarget: .58, yaw: 0, yawTarget: 0, t: 0 };
+const place = () => { const R = radar.offsetWidth * .4, N = orbitNodes.length;
+  radar.style.setProperty("--tilt", orbit.tilt.toFixed(3));
+  orbitNodes.forEach((n, i) => {
+    const th = (i * 360 / N + orbit.spin) * Math.PI / 180 - Math.PI / 2;
+    const x = Math.cos(th), z = Math.sin(th);                    // z: -1 at the back, +1 at the front
+    const px = x * R + orbit.yaw * z * R * .25, py = z * R * orbit.tilt;
+    const near = (z + 1) / 2, sc = .72 + .36 * near;
+    n.style.transform = `translate(-50%,-50%) translate(${px.toFixed(1)}px,${py.toFixed(1)}px) scale(${sc.toFixed(3)})`;
+    n.style.opacity = (.42 + .58 * near).toFixed(2);
+    n.style.zIndex = z > 0 ? 4 : 1;                               // behind the centre box when at the back
+    n.style.filter = z > 0 ? "none" : `blur(${((1 - near) * 1.2).toFixed(2)}px)`;
+    const sx = px / R * 40, sy = py / R * 40;
+    lines[i].setAttribute("x2", sx.toFixed(2)); lines[i].setAttribute("y2", sy.toFixed(2)); lines[i].style.strokeOpacity = (.15 + .4 * near).toFixed(2);
+    const f = ((orbit.t * .55 + i / N) % 1); packets[i].setAttribute("cx", (sx * (1 - f)).toFixed(2)); packets[i].setAttribute("cy", (sy * (1 - f)).toFixed(2)); packets[i].style.opacity = (Math.sin(f * Math.PI) * (.35 + .65 * near)).toFixed(2);
+  }); };
+if (!reduceMotion) {
+  gsap.ticker.add((time, dt) => { orbit.t = time; orbit.spin += dt * .001 * 22;   // 22 degrees a second: a full turn in about 16 s
+    orbit.tilt += (orbit.tiltTarget - orbit.tilt) * .06; orbit.yaw += (orbit.yawTarget - orbit.yaw) * .06;
+    orbit.tiltTarget = .58 + .04 * Math.sin(time * .6); place(); });
+  radar.addEventListener("pointermove", e => { const r = radar.getBoundingClientRect(); orbit.tiltTarget = .42 + .3 * ((e.clientY - r.top) / r.height); orbit.yawTarget = ((e.clientX - r.left) / r.width - .5) * 2; });
+  radar.addEventListener("pointerleave", () => { orbit.yawTarget = 0; });
+}
 addEventListener("resize", place); place();
 
 if (!reduceMotion) {
