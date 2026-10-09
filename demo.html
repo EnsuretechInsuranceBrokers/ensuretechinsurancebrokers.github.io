@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A click-through prototype of Ensuretech: upload a file, fix it, see the cost, watch the endorsement go through, from both the HR and the broker side.">
+<title>Demo — Ensuretech</title>
+<link rel="stylesheet" href="assets/deep.css"><link rel="stylesheet" href="assets/demo.css">
+</head>
+<body class="demo-body">
+<nav class="top scrolled"><div class="container nav-inner">
+  <a class="logo" href="index.html"><span class="logo-mark"><i></i></span> ENSURETECH</a>
+  <div class="nav-links"><a href="index.html">About</a><a href="demo.html" aria-current="page">Demo</a><a href="explore.html">Explore</a><a href="reference.html">Reference</a></div>
+  <div class="nav-actions"><a class="btn" href="contact_us.html">Contact us →</a><button class="btn" id="theme" type="button">☾ Dark</button></div>
+</div></nav>
+
+<main class="proto">
+  <div class="bar">
+    <div class="flows" role="tablist" aria-label="Choose a story">
+      <button type="button" role="tab" data-flow="hr">Priya · HR at Acme</button>
+      <button type="button" role="tab" data-flow="broker">Meera · Broker</button>
+    </div>
+    <div class="bar-mid mono"><span id="pos">1 / 1</span></div>
+    <div class="bar-r">
+      <button class="btn sm" id="hint" type="button" aria-pressed="false">Show clickable areas</button>
+      <button class="btn sm" id="restart" type="button">↺ Restart</button>
+    </div>
+  </div>
+
+  <div class="workspace">
+    <aside class="layers" aria-label="Screens"><div class="mono mut">SCREENS</div><ol id="layers"></ol></aside>
+    <section class="canvas" id="canvas" aria-label="Prototype">
+      <div class="frame-wrap" id="frame-wrap"><div class="frame" id="frame" tabindex="0" aria-live="polite"></div></div>
+      <div class="canvas-foot"><button class="btn sm" id="prev" type="button">← Back</button><span class="mut tip">Click the highlighted parts of the screen, or use the arrow keys. All names and amounts are sample data.</span><button class="btn sm" id="next" type="button">Next →</button></div>
+    </section>
+    <aside class="notes" aria-label="What is happening"><div class="mono mut">BEHIND THE SCREEN</div><h3 id="n-title"></h3><div id="n-body"></div></aside>
+  </div>
+</main>
+<script src="assets/data.js"></script><script src="assets/engine.js"></script><script src="assets/site.js"></script><script src="assets/demo.js"></script>
+</body></html>

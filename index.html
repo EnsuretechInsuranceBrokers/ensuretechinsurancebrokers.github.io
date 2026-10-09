@@ -226,6 +226,24 @@ body.light .camera-crosshair:before, body.light .camera-crosshair:after { backgr
   .stake-card, .intake-card, .nav-cta, .theme-toggle, .tech-pill { cursor:none; }
 }
 
+.story-text p.beat { font-size:clamp(22px,2.6vw,34px); line-height:1.2; margin:0 0 6px; padding:22px 0; border-top:1px solid var(--line); }
+.story-text p.beat:last-child { border-bottom:1px solid var(--line); }
+.tag { display:block; font:500 10px "DM Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+.hl { font-weight:800; } .hl.a { color:var(--acid); } .hl.b { color:var(--accent2); }
+.vision-h { font-size:clamp(38px,4.6vw,64px) !important; line-height:.98 !important; margin:0 0 26px !important; }
+.vision-chips { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 26px; }
+.vc { padding:8px 12px; border:1px solid currentColor; background:color-mix(in srgb,currentColor 9%,transparent); } .vc.a { color:var(--acid); } .vc.b { color:var(--accent2); }
+.vision-sub { font-size:clamp(18px,1.9vw,24px); line-height:1.35; letter-spacing:-.03em; color:var(--ink); margin:0; max-width:420px; }
+
+/* convergence orbit: six stakeholders evenly spaced, kept upright while the ring turns */
+.radar { width:100%; } .radar svg.spokes { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
+.radar svg.spokes line { stroke:var(--acid); stroke-opacity:.35; stroke-width:.4; stroke-dasharray:1.2 1.6; }
+.radar .node { left:50%; top:50%; right:auto; bottom:auto; white-space:nowrap; z-index:3; display:flex; align-items:center; gap:7px; border-color:color-mix(in srgb,var(--c) 55%,transparent); background:var(--bg); color:var(--ink); }
+.radar .node:before { content:""; width:7px; height:7px; background:var(--c); border-radius:50%; box-shadow:0 0 10px var(--c); }
+.radar .node:nth-of-type(odd) { --c:var(--acid); } .radar .node:nth-of-type(even) { --c:var(--accent2); }
+body.light .radar .node { background:#fff; }
+@media(max-width:560px) { .radar .node { padding:7px 9px; gap:5px; } .radar-center { font-size:12px; } }
+
 @media(max-width:900px) {
   .nav-links { display:none; } .hero { padding-top:130px; }
   .hero-bottom,.footer-top { flex-direction:column; align-items:flex-start; }
@@ -239,7 +257,7 @@ body.light .camera-crosshair:before, body.light .camera-crosshair:after { backgr
   .section { padding:95px 0; } .cards { grid-template-columns:1fr; }
   .story-side { padding-left:20px; }
   .radar { max-width:340px; } .radar-center { width:125px;height:125px;font-size:13px; }
-  .node { font-size:8px; } .n5,.n6 { display:none; }
+  .node { font-size:8px; }
   .pipe-step { grid-template-columns:55px 1fr; }
   .footer-bottom { flex-direction:column; gap:10px; }
 }
@@ -413,7 +431,7 @@ body.light .x-verdict.cbno, body.light .x-code { color:#c0392b; }
     <a class="logo" href="#"><span class="logo-mark"><i></i></span> ENSURETECH</a>
     <div class="nav-links">
       <a href="#story">Story</a><a href="#ecosystem">Ecosystem</a><a href="#platform">Platform</a><a href="#principles">Principles</a>
-      <a href="#journey">Journey</a><a href="#window">Simulator</a><a href="#security">Security</a><a href="explore.html">Explore</a><a href="reference.html">Reference</a>
+      <a href="#journey">Journey</a><a href="#window">Simulator</a><a href="#security">Security</a><a href="demo.html">Demo</a><a href="explore.html">Explore</a><a href="reference.html">Reference</a>
     </div>
     <div class="nav-actions">
       <a class="nav-cta mono" href="https://ensuretechinsurancebrokers.github.io/contact_us.html">Contact us →</a>
@@ -451,9 +469,9 @@ body.light .x-verdict.cbno, body.light .x-code { color:#c0392b; }
     </div>
     <div class="story">
       <div class="story-text">
-        <p>Insurance onboarding should not feel like a battle against spreadsheets, inconsistent data, and avoidable reconciliation.</p>
-        <p>Ensuretech was created around a simple idea: build the shared infrastructure layer that lets the insurance ecosystem work from validated operational truth.</p>
-        <p>Instead of another isolated portal, we are building a convergence platform where data enters once, moves through resilient workflows, and becomes useful to every stakeholder that needs it.</p>
+        <p class="beat"><span class="tag mono">01 · The problem</span>Onboarding is a battle against <b class="hl a">spreadsheets</b>, <b class="hl b">inconsistent data</b> and <b class="hl a">reconciliation</b>.</p>
+        <p class="beat"><span class="tag mono">02 · The idea</span>One shared layer that works from <b class="hl b">validated operational truth</b>.</p>
+        <p class="beat"><span class="tag mono">03 · The way</span>Data enters <b class="hl a">once</b>, moves through <b class="hl b">resilient workflows</b>, serves <b class="hl a">everyone</b>.</p>
       </div>
       <aside class="story-side">
         <p class="mono acid">THE THESIS</p>
@@ -471,6 +489,7 @@ body.light .x-verdict.cbno, body.light .x-code { color:#c0392b; }
       <p class="copy" style="margin-top:30px">The insurance onboarding ecosystem is interconnected. Ensuretech is designed around that reality: a neutral operational layer connecting the parties that create, validate, consume, and operate enrollment data.</p>
     </div>
     <div class="radar" id="radar">
+      <svg class="spokes" viewBox="-100 -100 200 200" aria-hidden="true"></svg>
       <div class="node n1">BROKERS</div><div class="node n2">TPAs</div><div class="node n3">INSURERS</div>
       <div class="node n4">EMPLOYERS</div><div class="node n5">HR TEAMS</div><div class="node n6">OPERATIONS</div>
       <div class="radar-center">ENSURETECH<br><span class="mono acid">CONVERGENCE</span></div>
@@ -493,7 +512,9 @@ body.light .x-verdict.cbno, body.light .x-code { color:#c0392b; }
     <div class="split">
       <div class="panel">
         <div class="eyebrow mono">/ 005 — VISION</div>
-        <h2>A world where insurance onboarding is invisible infrastructure — where brokers, TPAs, insurers, and employers converge on a single operational layer, and the friction of enrollment simply disappears.</h2>
+        <h2 class="vision-h">Onboarding that becomes <span class="acid">invisible</span> infrastructure.</h2>
+        <div class="vision-chips mono"><span class="vc a">Brokers</span><span class="vc b">TPAs</span><span class="vc a">Insurers</span><span class="vc b">Employers</span></div>
+        <p class="vision-sub">One operational layer. <b class="hl a">Enrollment friction</b> simply <b class="hl b">disappears</b>.</p>
       </div>
       <div class="panel">
         <div class="eyebrow mono">/ MISSION</div>
@@ -765,7 +786,7 @@ body.light .x-verdict.cbno, body.light .x-code { color:#c0392b; }
     <div class="mono" style="color:var(--acid);margin-bottom:18px">/016 · GO DEEPER</div>
     <h2 style="font-size:clamp(34px,5vw,72px);letter-spacing:-.07em;line-height:.94;margin:0 0 22px">Don't take our word.<br><span style="color:var(--acid)">Run the rules.</span></h2>
     <p style="max-width:700px;color:var(--muted);line-height:1.7;margin:0 0 30px">Two further pages. <b style="color:var(--ink)">Explore</b> runs the platform's real pricing, file checking, family rules, enrollment windows and state machine in your browser, on your own numbers. <b style="color:var(--ink)">Reference</b> shows who can do what, how the services talk, every endpoint, what came over from the old system, and what is not built yet.</p>
-    <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="nav-cta mono" style="display:inline-block" href="explore.html">Try the rules →</a><a class="nav-cta mono" style="display:inline-block" href="reference.html">Read the reference →</a></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="nav-cta mono" style="display:inline-block" href="demo.html">Click through the demo →</a><a class="nav-cta mono" style="display:inline-block" href="explore.html">Try the rules →</a><a class="nav-cta mono" style="display:inline-block" href="reference.html">Read the reference →</a></div>
   </div>
 </section>
 
@@ -806,6 +827,19 @@ setTheme(savedTheme === "light");
 
 themeToggle.addEventListener("click", () => setTheme(!body.classList.contains("light")));
 
+// (the ring turns; each label is counter-rotated so it always reads upright and nothing overlaps)
+const radar = document.querySelector("#radar");
+const orbitNodes = [...radar.querySelectorAll(".node")];
+const spokes = radar.querySelector(".spokes");
+orbitNodes.forEach((_, i) => { const a = i * Math.PI / 3 - Math.PI / 2; spokes.insertAdjacentHTML("beforeend", `<line x1="0" y1="0" x2="${(Math.cos(a) * 40).toFixed(2)}" y2="${(Math.sin(a) * 40).toFixed(2)}"/>`); });
+const spin = { r: 0 };
+const place = () => { const R = radar.offsetWidth * .4;
+  orbitNodes.forEach((n, i) => { const a = i * 60;
+    n.style.transform = `translate(-50%,-50%) rotate(${a + spin.r}deg) translateY(${-R}px) rotate(${-(a + spin.r)}deg)`; });
+  radar.style.setProperty("--spin", spin.r + "deg"); };
+if (!reduceMotion) gsap.to(spin, { r: 360, duration: 60, repeat: -1, ease: "none", onUpdate: () => { spokes.style.transform = `rotate(${spin.r}deg)`; place(); } });
+addEventListener("resize", place); place();
+
 if (!reduceMotion) {
   // Cinematic "camera drop" opening: zoom, tilt, scanline reveal.
   const cam = gsap.timeline({ defaults:{ ease:"power4.inOut" } });
@@ -844,8 +878,7 @@ if (!reduceMotion) {
   gsap.to("#marquee-track", { xPercent:-50, duration:18, ease:"none", repeat:-1 });
 
   // Rotating convergence network.
-  gsap.to("#radar", { rotation:360, duration:35, repeat:-1, ease:"none" });
-  gsap.to(".radar-center", { rotation:-360, duration:35, repeat:-1, ease:"none" });
+
 
   // Hero parallax.
   gsap.to(".orb", {
