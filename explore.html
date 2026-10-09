@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Working tools that run Ensuretech's real rules in your browser: what an endorsement costs, whether a file will pass, who can be covered, when an employee can join.">
+<title>Explore the rules — Ensuretech</title>
+<link rel="stylesheet" href="assets/deep.css">
+</head>
+<body>
+<div class="scroll-progress"></div>
+<nav class="top"><div class="container nav-inner">
+  <a class="logo" href="index.html"><span class="logo-mark"><i></i></span> ENSURETECH</a>
+  <div class="nav-links"><a href="index.html">About</a><a href="explore.html" aria-current="page">Explore</a><a href="reference.html">Reference</a><a href="index.html#status">Status</a></div>
+  <div class="nav-actions"><a class="btn" href="contact_us.html">Contact us →</a><button class="btn" id="theme" type="button">☾ Dark</button></div>
+</div></nav>
+
+<header class="hero"><div class="container">
+  <div class="kicker mono"><span class="acid">EXPLORE / 001</span> THE RULES, RUNNING</div>
+  <h1>Try the<br><span class="acid">rules.</span></h1>
+  <p class="lede">Nothing on this page is a mock-up. Each tool below runs the same logic the Ensuretech services run: the pro-rata and rounding, the file validation, the family rules, the enrollment windows and the endorsement state machine. Change an input and the answer, and the reason for it, changes with it.</p>
+  <div class="proof">
+    <div>15,000+<small>cases checked against the<br>platform's own Python and Java</small></div>
+    <div>7<small>working tools</small></div>
+    <div>0<small>servers: it all runs in<br>this page</small></div>
+  </div>
+</div></header>
+
+<div class="container layout">
+  <aside class="toc" aria-label="Tools"><span class="mono">TOOLS</span>
+    <a href="#price">Cost of an endorsement</a><a href="#types">Premium types, side by side</a><a href="#file">Will this file pass?</a><a href="#family">Who can be covered?</a><a href="#midterm">Dependants joining late</a><a href="#window">Enrollment windows</a><a href="#states">The endorsement state machine</a>
+    <span class="mono" style="margin-top:26px">TRUST</span><a href="#verified">How these are verified</a></aside>
+  <main>
+    <section class="tool reveal" id="price">
+      <div class="tool-head"><span class="num">01</span><h2>What will this endorsement cost?</h2>
+        <p>The full pricing of one employee's family: the premium before and after, each person's change prorated by their own relation, the refund when someone leaves, rounding, tax, and who pays. Pick an example or edit anything.</p>
+        <div class="src"><span class="chip acid">pro_rata.py</span><span class="chip acid">pricing.py</span><span class="chip acid">contribution.py</span><span class="chip">policy-service raters</span><span class="chip ok">7,500 + 3,900 cases verified</span></div></div>
+      <div id="t-price"></div>
+      <details class="how"><summary>How the number is built</summary><div class="body">
+        <p>Each person has an <b>annual premium</b> from the policy's rate card (a flat amount, an age band, a grade, a per-mille of the sum insured, or one premium for the whole family). The endorsement changes who is covered, so for each person we take <b>the change in annual premium</b> and multiply it by a <b>pro-rata factor</b> for the part of the year it applies.</p>
+        <p><b>Joining or increasing</b>: days from the effective date to the policy end, over days in the policy period, both inclusive (daily) or whole months rounded up (monthly). A start on or before the policy start pays in full. <b>Leaving</b>: the part of the year after cover ended is refunded; the leaving day itself is covered. The factor has six decimal places; money is rounded once, at the end.</p>
+        <p>The total is then rounded by the policy's rule (none, floor, ceiling or nearest, to a unit), tax is charged on the rounded amount, and if the policy has a contribution plan the amount is split between employee and employer, never letting rounding make either side pay more than the whole.</p></div></details>
+    </section>
+
+    <section class="tool reveal" id="types">
+      <div class="tool-head"><span class="num">02</span><h2>Same family, every premium type</h2>
+        <p>Group policies price people very differently: a flat amount, by age, by grade, one premium per family, a fraction of the sum insured. Build a family and see what each rate card does with it, including the cases where the platform refuses, and why.</p>
+        <div class="src"><span class="chip acid">policy-service engine/*.java</span><span class="chip ok">900 quotes verified against the Java</span></div></div>
+      <div id="t-types"></div>
+    </section>
+
+    <section class="tool reveal" id="file">
+      <div class="tool-head"><span class="num">03</span><h2>Will this file pass?</h2>
+        <p>Paste a CSV the way an HR team would export it: odd date formats, rupee signs, "Wife" or "Son-II" for relations, column names nobody agreed on. See how the platform reads each cell and exactly which lines would be rejected, and for what.</p>
+        <div class="src"><span class="chip acid">schema.py</span><span class="chip acid">normalize.py</span><span class="chip acid">rules.py</span><span class="chip acid">batch.py</span><span class="chip ok">3,700 messy cases verified</span></div></div>
+      <div id="t-file"></div>
+    </section>
+
+    <section class="tool reveal" id="family">
+      <div class="tool-head"><span class="num">04</span><h2>Who can be covered?</h2>
+        <p>A policy's family rules: which relations, how many children and parents, age limits, the age gap a child must have, twins. Set the rules, build a family, and read the verdict person by person.</p>
+        <div class="src"><span class="chip acid">FamilyConstructService.java</span><span class="chip ok">3,000 families verified against the Java</span></div></div>
+      <div id="t-family"></div>
+    </section>
+
+    <section class="tool reveal" id="midterm">
+      <div class="tool-head"><span class="num">05</span><h2>A dependant joins after the employee</h2>
+        <p>A spouse added after a wedding, a baby after a birth: from when is the new person covered, and is it still allowed without HR's approval? The policy decides, separately for spouse, partner and children.</p>
+        <div class="src"><span class="chip acid">midterm.py</span><span class="chip ok">cases from the platform's tests</span></div></div>
+      <div id="t-midterm"></div>
+    </section>
+
+    <section class="tool reveal" id="window">
+      <div class="tool-head"><span class="num">06</span><h2>Can this employee join today?</h2>
+        <p>Enrollment windows with a picture: the policy period, the window, an employee's own extension, the mid-term window, and today. Change the dates and watch the bars and the verdict move.</p>
+        <div class="src"><span class="chip acid">EnrollmentWindowEvaluator.java</span><span class="chip ok">17 cases from the Java tests</span></div></div>
+      <div id="t-window"></div>
+    </section>
+
+    <section class="tool reveal" id="states">
+      <div class="tool-head"><span class="num">07</span><h2>The endorsement state machine</h2>
+        <p>Every endorsement is a job that moves through 36 states, and only some moves are legal. Select a state to see where it can go and where it came from, or start a job and walk it through, one legal step at a time.</p>
+        <div class="src"><span class="chip acid">states.py</span><span class="chip ok">generated from the engine's own graph</span></div></div>
+      <div id="t-states"></div>
+    </section>
+
+    <section class="tool reveal" id="verified">
+      <div class="tool-head"><span class="num">08</span><h2>How these are verified</h2>
+        <p>A model of the rules that quietly drifts from the real thing is worse than none. So the code behind this page is checked, case for case, against what the platform itself answers.</p></div>
+      <div class="panel"><table class="tbl"><thead><tr><th>What</th><th class="r">Cases</th><th>Checked against</th></tr></thead><tbody>
+        <tr><td>Pro-rata factors, refunds, rounding, who-pays split</td><td class="r">7,500</td><td>the engine's Python, run on random policies, dates and amounts</td></tr>
+        <tr><td>Family rules and rate-card quotes</td><td class="r">3,900</td><td>the policy service's Java, including its error messages word for word</td></tr>
+        <tr><td>File reading: relations, dates, amounts, validation</td><td class="r">2,500</td><td>the engine's Python, on deliberately messy cells</td></tr>
+        <tr><td>Column-name matching</td><td class="r">1,200</td><td>the engine's Python, with typos and noise</td></tr>
+        <tr><td>Enrollment windows, mid-term dependants, state graph</td><td class="r">37</td><td>the platform's own test cases, and the generated state graph</td></tr></tbody></table></div>
+      <p class="mut" style="margin-top:18px;line-height:1.7;max-width:760px">Where a tool is a simplification it says so. The file checker skips the checks that need the live member list unless you provide one, and the cost calculator prices one employee's family at a time. Real endorsements run the same arithmetic over many families at once.</p>
+    </section>
+  </main>
+</div>
+
+<footer class="footer"><div class="container">
+  <div class="footer-top"><div><div class="mono acid">ENSURETECH™</div><div class="footer-title">Operational<br><span class="acid">infrastructure.</span></div></div>
+  <p>Where the insurance ecosystem converges.<br><br>Every rule on this page is the platform's own, readable and testable.</p></div>
+  <div class="footer-bottom mono"><span>© Ensuretech</span><span><a href="index.html">About</a> · <a href="reference.html">Reference</a></span><span>CONVERGE →</span></div>
+</div></footer>
+<script src="assets/data.js"></script><script src="assets/engine.js"></script><script src="assets/site.js"></script><script src="assets/explore.js"></script>
+</body></html>

@@ -413,7 +413,7 @@ body.light .x-verdict.cbno, body.light .x-code { color:#c0392b; }
     <a class="logo" href="#"><span class="logo-mark"><i></i></span> ENSURETECH</a>
     <div class="nav-links">
       <a href="#story">Story</a><a href="#ecosystem">Ecosystem</a><a href="#platform">Platform</a><a href="#principles">Principles</a>
-      <a href="#journey">Journey</a><a href="#window">Simulator</a><a href="#security">Security</a>
+      <a href="#journey">Journey</a><a href="#window">Simulator</a><a href="#security">Security</a><a href="explore.html">Explore</a><a href="reference.html">Reference</a>
     </div>
     <div class="nav-actions">
       <a class="nav-cta mono" href="https://ensuretechinsurancebrokers.github.io/contact_us.html">Contact us →</a>
@@ -760,6 +760,15 @@ body.light .x-verdict.cbno, body.light .x-code { color:#c0392b; }
   </div>
 </section>
 
+<section class="section" id="deeper" style="padding-top:40px">
+  <div class="container">
+    <div class="mono" style="color:var(--acid);margin-bottom:18px">/016 · GO DEEPER</div>
+    <h2 style="font-size:clamp(34px,5vw,72px);letter-spacing:-.07em;line-height:.94;margin:0 0 22px">Don't take our word.<br><span style="color:var(--acid)">Run the rules.</span></h2>
+    <p style="max-width:700px;color:var(--muted);line-height:1.7;margin:0 0 30px">Two further pages. <b style="color:var(--ink)">Explore</b> runs the platform's real pricing, file checking, family rules, enrollment windows and state machine in your browser, on your own numbers. <b style="color:var(--ink)">Reference</b> shows who can do what, how the services talk, every endpoint, what came over from the old system, and what is not built yet.</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="nav-cta mono" style="display:inline-block" href="explore.html">Try the rules →</a><a class="nav-cta mono" style="display:inline-block" href="reference.html">Read the reference →</a></div>
+  </div>
+</section>
+
 <footer class="footer" id="contact">
   <div class="container">
     <div class="footer-top">
@@ -944,11 +953,11 @@ if (!reduceMotion) {
     { k: "STEP 04 · COVER THE COST", t: "The deposit must cover it",
       a: "The billing service checks the policy's deposit account and reserves the amount. If it falls short, the job stops at CD_INSUFFICIENT and the broker and HR can see exactly by how much.",
       b: "After a top-up, Retry resumes the same job. Nothing is re-uploaded, re-validated or re-priced by hand.",
-      s: [["CD_CHECK", ""], ["CD_INSUFFICIENT", "stop"], ["CD_SUFFICIENT", "ok"]] },
+      s: [["CD_CHECK_INITIATED", ""], ["CD_INSUFFICIENT", "stop"], ["CD_SUFFICIENT", "ok"]] },
     { k: "STEP 05 · ENDORSE", t: "The roster changes, the ledger moves",
       a: "Members are added, removed or updated, the deposit is debited with the endorsement's id as the reference, and the job reaches ENDORSED. Every transition is audited with who, when and how long it took.",
       b: "State changes are published as events through a transactional outbox, so dashboards, reports and notifications follow without any service reaching into another's database.",
-      s: [["ENDORSEMENT_IN_PROGRESS", ""], ["ENDORSED", "ok"], ["CANCELLED_BY_HR", "stop"]] },
+      s: [["ENDORSEMENT_IN_PROGRESS", ""], ["ENDORSED", "ok"], ["ENDORSEMENT_FAILED", "stop"]] },
     { k: "STEP 06 · INSURER & TPA · NEXT", t: "Reaching the other side",
       a: "After the roster changes, the endorsement still has to reach the insurer, be confirmed by the TPA, and produce e-cards and an endorsement copy. Those stages exist as states (sent to insurer, awaiting TPA confirmation, e-cards awaited, endorsement copy, partially processed, closed) and an operator can move a job through them.",
       b: "What is not built yet is the adapter for each insurer and TPA. Each needs its own contract, credentials and sample responses. The generic connector and the roster reconciliation are in place and tested against a stand-in.",

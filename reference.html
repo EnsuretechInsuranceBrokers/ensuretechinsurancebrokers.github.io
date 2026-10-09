@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="How Ensuretech is put together: who can do what, how the services talk, every endpoint the portals use, what came over from the old system and what has not been built yet.">
+<title>Reference — Ensuretech</title>
+<link rel="stylesheet" href="assets/deep.css">
+</head>
+<body>
+<div class="scroll-progress"></div>
+<nav class="top"><div class="container nav-inner">
+  <a class="logo" href="index.html"><span class="logo-mark"><i></i></span> ENSURETECH</a>
+  <div class="nav-links"><a href="index.html">About</a><a href="explore.html">Explore</a><a href="reference.html" aria-current="page">Reference</a><a href="index.html#status">Status</a></div>
+  <div class="nav-actions"><a class="btn" href="contact_us.html">Contact us →</a><button class="btn" id="theme" type="button">☾ Dark</button></div>
+</div></nav>
+
+<header class="hero"><div class="container">
+  <div class="kicker mono"><span class="acid">REFERENCE / 002</span> HOW IT IS PUT TOGETHER</div>
+  <h1>Under the<br><span class="acid">hood.</span></h1>
+  <p class="lede">The parts of Ensuretech a broker, an HR team, an insurer or an engineer asks about first: who is allowed to do what, how the services tell each other things, every call the portals can make, what we carried over from the old system, and, plainly, what is not built yet. Read from the platform's own code, not written from memory.</p>
+  <div class="proof">
+    <div>9<small>services, one job each</small></div>
+    <div>112<small>endpoints behind one<br>gateway per portal</small></div>
+    <div>5<small>roles, enforced in<br>every service</small></div>
+  </div>
+</div></header>
+
+<div class="container layout">
+  <aside class="toc" aria-label="Sections">
+    <span class="mono">SECTIONS</span>
+    <a href="#access">Who can do what</a><a href="#events">How the services talk</a><a href="#api">Every endpoint</a><a href="#security">Why nothing is exposed</a><a href="#legacy">From the old system</a><a href="#stakeholders">What changes for you</a><a href="#glossary">Glossary</a><a href="#honest">What is not built</a>
+  </aside>
+  <main>
+    <section class="tool reveal" id="access">
+      <div class="tool-head"><span class="num">01</span><h2>Who can do what</h2>
+        <p>Five roles, two kinds of customer. A broker's staff come in three grades, an employer's in two. Pick a role to see what it can do; the right-hand note on each row is the line of code that decides it, so none of this is a policy document that can drift from the product.</p>
+        <div class="src"><span class="chip acid">SecurityConfig.java</span><span class="chip acid">@PreAuthorize</span><span class="chip acid">endorsement-service permissions</span><span class="chip ok">read from the services' code</span></div></div>
+      <div id="r-access"></div>
+      <p class="mut" style="margin-top:18px;line-height:1.7;max-width:780px;font-size:14.5px">Two things catch people out. A broker's non-admin staff can <b>read</b> endorsement jobs but cannot <b>upload</b> one; an employer's non-admin staff can upload but cannot <b>decide</b> (proceed, retry, cancel or close). And every read is also scoped to the caller's own tenant: a broker only ever sees its own employers, an employer only its own policies, whatever the role.</p>
+    </section>
+
+    <section class="tool reveal" id="events">
+      <div class="tool-head"><span class="num">02</span><h2>How the services talk</h2>
+        <p>Services never reach into each other's databases. When something happens, the owner records an event alongside the change (an outbox), a relay publishes it, and whoever cares reads it. That is why a policy approval opens a deposit account without the policy service knowing billing exists. Click a topic to see who writes it and who reads it.</p>
+        <div class="src"><span class="chip acid">outbox relays</span><span class="chip acid">Kafka topics</span><span class="chip ok">table generated from the producers and consumers in the code</span></div></div>
+      <div id="r-events"></div>
+    </section>
+
+    <section class="tool reveal" id="api">
+      <div class="tool-head"><span class="num">03</span><h2>Every endpoint</h2>
+        <p>The browser and the portals talk to one place, the gateway, never to a core service. This is its whole surface, generated from the gateway's contract: the same file that drives its routing, its validation and the fields it lets through. Search it, filter it, open a row to see what it accepts.</p>
+        <div class="src"><span class="chip acid">bff contract</span><span class="chip ok">112 endpoints, generated</span></div></div>
+      <div id="r-api"></div>
+    </section>
+
+    <section class="tool reveal" id="security">
+      <div class="tool-head"><span class="num">04</span><h2>Why nothing is exposed</h2>
+        <p>The core services have no public face. Three independent checks sit between the internet and a rate card or an employee list, and each one fails closed.</p></div>
+      <div class="two"><div><h3>What the gateway adds</h3><ul>
+        <li><b>Sign-in is the only door.</b> The portal keeps the token server-side in an encrypted session; the browser only holds a session cookie, never a token it could leak.</li>
+        <li><b>Contract, not pass-through.</b> A request that is not in the contract is a 404. A field that is not on the allow-list never reaches a service.</li>
+        <li><b>Tenant from the token.</b> An employer's id comes from who it is, never from a URL a user could edit.</li></ul></div>
+        <div><h3>What every service checks again</h3><ul>
+        <li><b>A shared gateway secret</b> and a key derived from the session must accompany each call, or the service refuses it. A request that skips the gateway is refused at the first line.</li>
+        <li><b>The role, per route.</b> Each service re-checks the role itself; it does not trust that the gateway already did.</li>
+        <li><b>The tenant, per row.</b> Queries are scoped to the broker or employer in the token, so a valid user cannot ask for someone else's data.</li></ul></div></div>
+      <p class="mut" style="margin-top:18px;line-height:1.7;max-width:780px;font-size:14.5px">Local development can run with the secret left blank, which switches the check off so tools can be tried without ceremony. Production sets it; the setup guide in the repository says how.</p>
+    </section>
+
+    <section class="tool reveal" id="legacy">
+      <div class="tool-head"><span class="num">05</span><h2>From the old system</h2>
+        <p>Ensuretech did not start from a blank page. We read the legacy system's code to learn what the business does and which rules customers rely on, then rebuilt them with tests. This is the honest ledger: what came over, what came over changed, and what did not.</p></div>
+      <div id="r-legacy"></div>
+    </section>
+
+    <section class="tool reveal" id="stakeholders">
+      <div class="tool-head"><span class="num">06</span><h2>What changes for you</h2>
+        <p>The same platform looks different from each chair. Pick yours.</p></div>
+      <div id="r-people"></div>
+    </section>
+
+    <section class="tool reveal" id="glossary">
+      <div class="tool-head"><span class="num">07</span><h2>Glossary</h2>
+        <p>The words the platform uses, in the sense it uses them.</p></div>
+      <div id="r-glossary"></div>
+    </section>
+
+    <section class="tool reveal" id="honest">
+      <div class="tool-head"><span class="num">08</span><h2>What is not built</h2>
+        <p>A reference that only lists what works is a brochure. These are the gaps, as of the code this page was generated from.</p></div>
+      <div class="two"><div><h3>Needs a contract before it can exist</h3><ul>
+        <li>Live connections to individual TPAs and insurers. The lifecycle states and the endpoint that drives them are built; the adapters that talk to each TPA and insurer are not, because each needs credentials and a signed agreement.</li>
+        <li>E-card and endorsement-copy retrieval, which come from the TPA or insurer.</li>
+        <li>SMS, WhatsApp and one-time passwords. These need a telecom sender registration.</li>
+        <li>Payments. The deposit ledger records money received; it does not collect it.</li></ul></div>
+        <div><h3>Ours to build next</h3><ul>
+        <li>Refusing an upload for an employee whose enrollment window has closed. The check exists and can be called; wiring it into validation needs a decision on whether a closed window blocks or only warns.</li>
+        <li>Deposit accounts that fund a company or a group of policies in the legacy way, and parent and child employers.</li>
+        <li>Port the premium types production actually uses; some legacy types map only approximately.</li>
+        <li>A decision on the leaving day for removals, and on the default refund when pro-rata is off.</li></ul></div></div>
+    </section>
+  </main>
+</div>
+
+<footer class="footer"><div class="container">
+  <div class="footer-top"><div><div class="mono acid">ENSURETECH™</div><div class="footer-title">Operational<br><span class="acid">infrastructure.</span></div></div>
+  <p>Where the insurance ecosystem converges.<br><br>If a page here says something the code does not, the code is right and we want to hear about it.</p></div>
+  <div class="footer-bottom mono"><span>© Ensuretech</span><span><a href="index.html">About</a> · <a href="explore.html">Explore</a></span><span>CONVERGE →</span></div>
+</div></footer>
+<script src="assets/data.js"></script><script src="assets/site.js"></script><script src="assets/reference.js"></script>
+</body></html>
