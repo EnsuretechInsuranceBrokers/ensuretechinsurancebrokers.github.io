@@ -2,6 +2,7 @@
 (function () {
   "use strict";
   var D = ETDATA;
+  Array.prototype.forEach.call(document.querySelectorAll("[data-endpoint-count]"), function (n) { n.textContent = String(D.api.length); });   // the headline number is the generated catalogue's own length
   function h(tag, attrs) {
     var e = document.createElement(tag), kids = Array.prototype.slice.call(arguments, 2);
     Object.keys(attrs || {}).forEach(function (k) { var v = attrs[k];

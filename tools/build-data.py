@@ -60,6 +60,7 @@ EVENTS = [
   ["cd-balance.updates", "CdBalanceUpdated / CdBalanceLow", "billing-service", "read-service", "updates the balances on dashboards and the low-balance flags (shared accounts update every policy they fund)"],
   ["tpa.events", "TpaSyncCompleted / TpaSyncFailed", "integration-service", "read-service", "shows sync health; a dead-lettered sync waits for an operator to retry it"],
   ["endorsement.events + policy.events + cd-balance.updates + tpa.events", "all of the above", "various", "read-service", "projects every event into the read models behind the dashboards, reports and the assistant's history"],
+  ["endorsement.events + policy.events + tpa.events", "state changes, applied, approved, sync failed", "various", "search-service", "indexes policies, endorsements and activity as searchable text, so any slice of a policy number or log line can be found without asking a core service"],
   ["endorsement.events + policy.events + cd-balance.updates + tpa.events", "state changes, applied, approved, low balance, sync failed", "various", "notification-service", "turns them into mail triggers: request raised, needs review, failed, blocked on deposit, member added or removed"],
 ]
 body = {"generated": {"from": "Ensuretech platform repository", "commit": sha}, "states": states, "schema": schema, "api": api, "compositions": comp, "roles": ROLES, "access": ACCESS, "events": EVENTS}
