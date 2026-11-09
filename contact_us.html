@@ -23,6 +23,7 @@
 #status.ok { color:var(--acid); } #status.err { color:#ff7a6b; }
 .side { border-left:1px solid var(--line); padding-left:32px; display:grid; gap:26px; }
 .side h2 { font-size:15px; margin:0 0 6px; letter-spacing:-.01em; } .side p, .side li { color:var(--muted); line-height:1.65; font-size:15px; margin:0; }
+.side .reach { list-style:none; padding:0; gap:10px; } .side .reach .mono { display:inline-block; min-width:78px; font-size:11px; letter-spacing:.1em; color:var(--muted); }
 .side ul { margin:0; padding-left:18px; display:grid; gap:6px; }
 @media(max-width:860px){ .contact { grid-template-columns:1fr; gap:34px; } .side { border-left:0; padding-left:0; border-top:1px solid var(--line); padding-top:28px; } .contact .row { grid-template-columns:1fr; } }
 </style>
@@ -67,6 +68,12 @@
   </form>
 
   <aside class="side" aria-label="What to expect">
+    <div><h2>Reach us</h2><ul class="reach">
+      <li><span class="mono">PHONE</span> <a id="c-phone" href="#"></a></li>
+      <li><span class="mono">EMAIL</span> <a id="c-email" href="#"></a></li>
+      <li><span class="mono">OFFICE</span> <span id="c-address"></span></li>
+      <li><span class="mono">LINKEDIN</span> <a id="c-linkedin" href="#" rel="noopener"></a></li>
+    </ul></div>
     <div><h2>What happens next</h2><ul><li>We read your message and reply by email, usually within two working days.</li><li>If it helps, we set up a short call and walk through the <a href="demo.html">demo</a> with your own scenario.</li><li>Nothing is sold to a third party and no account is created.</li></ul></div>
     <div><h2>Before you write</h2><p>Many questions are answered in the open: <a href="explore.html">Explore</a> runs the pricing and file rules on your own numbers, and <a href="reference.html">Reference</a> lists every endpoint, role and what is not built yet.</p></div>
     <div><h2>Source and documentation</h2><p>The platform and its documentation live in the <a href="https://github.com/EnsuretechInsuranceBrokers/Ensuretech" rel="noopener">Ensuretech repository</a>.</p></div>
@@ -84,7 +91,20 @@
 (function () {
   "use strict";
   var form = document.getElementById("contact-form"), send = document.getElementById("send"), status = document.getElementById("status");
-  var RECIPIENT = "choudharyu2003@gmail.com";          // the same address as the form's action; the first message makes FormSubmit email this inbox an activation link
+  // PLACEHOLDERS: the phone, address and LinkedIn values below are dummy data to be replaced. Everything on the page that shows contact details reads from here.
+  const CONTACT = {
+    phone: "+91 00000 00000",
+    address: "Ensuretech, 1 Sample Street, Sample Business Park, Mumbai 400001, India",
+    linkedin: "https://www.linkedin.com/company/ensuretech-sample"
+  };
+  const RECIPIENT = "choudharyu2003@gmail.com";          // the same address as the form's action; the first message makes FormSubmit email this inbox an activation link
+  (function fillContact() {
+    var phone = document.getElementById("c-phone"), mail = document.getElementById("c-email"), li = document.getElementById("c-linkedin");
+    phone.textContent = CONTACT.phone; phone.href = "tel:" + CONTACT.phone.replace(/[^+\d]/g, "");
+    mail.textContent = RECIPIENT; mail.href = "mailto:" + RECIPIENT;
+    document.getElementById("c-address").textContent = CONTACT.address;
+    li.textContent = CONTACT.linkedin.replace(/^https?:\/\/(www\.)?/, ""); li.href = CONTACT.linkedin;
+  })();
   function say(text, kind) { status.textContent = text; status.className = kind || ""; }
   function value(id) { return document.getElementById(id).value.trim(); }
   function mailto() {
