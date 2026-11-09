@@ -795,25 +795,16 @@ footer a{color:var(--ink-soft);}
         <label>Policy</label>
         <div class="radiogroup" id="pm-srcChips">
           <label class="chip active"><input type="radio" name="pm-src" value="paste" checked> Paste / open spec file</label>
-          <label class="chip"><input type="radio" name="pm-src" value="service"> Load from the service</label>
           <label class="chip"><input type="radio" name="pm-src" value="sample"> Sample policy</label>
         </div>
       </div>
       <div class="subpanel" id="pm-src-paste">
-        <div class="field"><label for="pm-specText">sheet-spec/v1 JSON <span class="hint">the output of GET /api/v1/broker/policies/{id}/sheet-spec</span></label>
+        <div class="field"><label for="pm-specText">sheet-spec/v1 JSON <span class="hint">a policy's sheet specification exported from Ensuretech; this page never contacts any server</span></label>
           <textarea id="pm-specText" spellcheck="false" placeholder='{"schema":"sheet-spec/v1", ...}'></textarea></div>
         <div style="display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap;">
           <input type="file" id="pm-specFile" accept=".json,application/json" style="width:auto;">
           <button class="btn primary" id="pm-useSpec" type="button">Use this spec</button>
         </div>
-      </div>
-      <div class="subpanel" id="pm-src-service" hidden>
-        <div class="field-row">
-          <div class="field"><label for="pm-policyId">Policy id</label><input type="number" id="pm-policyId" min="1"></div>
-          <div class="field"><label for="pm-token">Access token <span class="hint">kept in memory only</span></label><input type="text" id="pm-token" autocomplete="off" style="-webkit-text-security:disc;"></div>
-        </div>
-        <button class="btn primary" id="pm-loadSpec" type="button">Load spec</button>
-        <div class="note" id="pm-serviceNote">Only available when this page is served by the sheet-generator service. Opened from disk, use "Paste / open spec file".</div>
       </div>
       <div class="subpanel" id="pm-src-sample" hidden>
         <p class="sub" style="margin:0 0 10px;">A made-up flat GMC policy for the current financial year, just to try this section.</p>
@@ -4349,7 +4340,7 @@ RaterModel.LEGACY_SAMPLES = {"SI": {"2": {"file": "age_wise_si_5.xlsx", "aoa": [
   "use strict";
   var G = EnsureSheetGen, $ = function (id) { return document.getElementById(id); };
   var PREVIEW_ROWS = 100, SAMPLE_FAMILIES = 300, SOURCE_ROW_CAP = 200000, XLSX_WARN_ROWS = 50000, SLICE_MS = 30;
-  var state = { spec: null, op: "ADD", source: null, token: null, result: null, running: false, cancel: false };
+  var state = { spec: null, op: "ADD", source: null, result: null, running: false, cancel: false };
 
   function today() { var n = new Date(); return new Date(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate())); }
   function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { /* private mode: fine */ } return null; }
@@ -4369,7 +4360,7 @@ RaterModel.LEGACY_SAMPLES = {"SI": {"2": {"file": "age_wise_si_5.xlsx", "aoa": [
       fn(e.target.value);
     });
   }
-  chips("pm-srcChips", function (v) { ["paste", "service", "sample"].forEach(function (k) { show("pm-src-" + k, k === v); }); });
+  chips("pm-srcChips", function (v) { ["paste", "sample"].forEach(function (k) { show("pm-src-" + k, k === v); }); });
   chips("pm-opChips", function (op) { state.op = op; refresh(); });
 
   function refresh() {
@@ -4423,17 +4414,6 @@ RaterModel.LEGACY_SAMPLES = {"SI": {"2": {"file": "age_wise_si_5.xlsx", "aoa": [
       relationRules: [{ relationCode: "SON", maxTwins: 2 }, { relationCode: "DAUGHTER", maxTwins: 2 }],
       sheet: { needsGrade: false, needsDesignation: false, needsFlexPlan: false }, gaps: [] }, "Sample policy loaded (not a real policy).");
   });
-  $("pm-loadSpec").addEventListener("click", function () {
-    var id = parseInt($("pm-policyId").value, 10), tok = $("pm-token").value.trim();
-    if (location.protocol === "file:") { msgSpec("The service is not reachable from a file opened on disk. Paste or open the spec JSON instead.", true); return; }
-    if (!(id > 0) || !tok) { msgSpec("Enter a policy id and your token.", true); return; }
-    state.token = tok;
-    fetch("/api/v1/broker/sheets/spec?policyId=" + id, { headers: { Authorization: "Bearer " + tok } }).then(function (r) {
-      if (!r.ok) throw new Error(r.status === 404 ? "Policy not found." : r.status === 401 || r.status === 403 ? "The token was refused." : "The service answered " + r.status + ".");
-      return r.json();
-    }).then(function (j) { setSpec(j, "Spec loaded from the service for policy " + id + "."); }, function (e) { msgSpec(e.message || "Could not reach the service.", true); });
-  });
-
   // ── source for UPDATE / REMOVE ────────────────────────────────────────────────────────────────────────────
   function parseCsv(text) {
     var rows = [], row = [], f = "", q = false, i = 0;
